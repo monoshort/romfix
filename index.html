@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romfix Versterkings- & Berekeningshulpmiddel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container header-flex">
+            <div class="logo-section">
+                <a class="brand" href="#top" aria-label="Romfix">
+                    <img class="brand-logo" src="assets/romfix-logo.webp" alt="Romfix logo">
+                </a>
+                <p class="tagline">Duurzame funderings- en verhardingsoplossingen</p>
+            </div>
+
+            <nav class="nav" aria-label="Hoofdnavigatie">
+                <button class="nav-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">
+                    Menu
+                </button>
+                <ul id="primaryNav" class="nav-links">
+                    <li><a href="#config">Tool</a></li>
+                    <li><a href="#result">Resultaat</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="contact-info">
+                <p><strong>Romfix B.V.</strong><br>
+                <a href="https://www.romfix.nl">www.romfix.nl</a><br>
+                info@romfix.nl</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="document-header">
+        <div class="container">
+            <h1>Romfix Versterkings- & Berekeningshulpmiddel</h1>
+            <p class="document-lead">
+                Bereken draagkracht, equivalente modulus, wapeningseffect en levensduur met E'Grid, R'Cel en R'Tex
+            </p>
+            <div class="meta">
+                <p><strong>Type:</strong> Geavanceerd indicatief rekenhulpmiddel</p>
+                <p><strong>Functies:</strong> Equivalente stijfheid, SIF/MIF-impact, laagdikte-optimalisatie, levensduurraming, gewapend vs. ongewapend vergelijking</p>
+                <p><strong>Gebaseerd op:</strong> Romfix-systemen + Austroads, Thenn de Barros, Palmer & Barber methodieken</p>
+                <p><strong>Gebruik:</strong> Voor snelle scans en eerste ontwerpen – definitieve berekeningen altijd via Romfix</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <section id="config" class="form-section">
+            <div class="uitleg-box">
+                <h3>Hoe werkt deze Romfix-tool?</h3>
+                <p>Dit is een interactief rekenhulpmiddel waarmee je snel de versterkende werking van het Romfix-systeem (E'Grid geogrids, R'Cel geocellen, R'Tex scheidingsdoek) op slappe of matig draagkrachtige ondergrond kunt inschatten.</p>
+                <p>Je voert verkeersbelasting, ondergrondtype en Romfix-parameters in. De tool berekent vervolgens:</p>
+                <ul>
+                    <li>Equivalente stijfheidsmodulus (E_eq) van de gewapende fundering</li>
+                    <li>Effect van wapening (SIF & MIF)</li>
+                    <li>Geschatte levensduur bij de gekozen belasting</li>
+                    <li>Vergelijking met een ongewapende opbouw</li>
+                    <li>Indicatie van benodigde laagdiktes</li>
+                </ul>
+                <p><strong>Belangrijk:</strong> Dit is een indicatieve tool. Voor projectmatige toepassing, sonderingen of verkeersklasseberekeningen altijd een officiële sterkteberekening aanvragen bij Romfix.</p>
+            </div>
+
+            <h2>Configureer je berekening</h2>
+            <p>Vul de parameters in om de versterking en prestaties van een Romfix-fundering te berekenen.</p>
+
+            <form id="adviceForm">
+                <div class="form-group">
+                    <label for="verkeersintensiteit">Verkeersintensiteit (vrachtwagens per werkdag):</label>
+                    <input type="number" id="verkeersintensiteit" value="10" min="1" required title="Gemiddeld aantal zware voertuigen per werkdag per richting">
+                    <div class="param-uitleg">Meer verkeer → dikkere opbouw of kortere levensduur</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ondergrond_type">Ondergrondtype:</label>
+                    <select id="ondergrond_type" required>
+                        <option value="veen_klei">Veen / Klei (zeer slap)</option>
+                        <option value="klei">Klei (slap tot matig)</option>
+                        <option value="zand">Zand (matig tot stevig)</option>
+                    </select>
+                    <div class="param-uitleg">Slappere ondergrond → zwaardere Romfix-opbouw nodig</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="breedte">Wegbreedte (m):</label>
+                    <input type="number" id="breedte" value="2.75" step="0.1" min="1" required>
+                    <div class="param-uitleg">Smalle wegen vragen extra aandacht voor randstabiliteit</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="levensduur">Gewenste levensduur (jaren):</label>
+                    <input type="number" id="levensduur" value="20" min="1" required>
+                    <div class="param-uitleg">Langer gewenste levensduur → zwaardere constructie</div>
+                </div>
+
+                <h3>Romfix-systeem parameters</h3>
+
+                <div class="form-group">
+                    <label for="series_type">Romfix type:</label>
+                    <select id="series_type">
+                        <option value="capping">Capping (lichtere series)</option>
+                        <option value="roadbase">RoadBase (zwaardere series)</option>
+                    </select>
+                    <div class="param-uitleg">Kies het systeem dat past bij de toepassing</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="excel_case">Excel model (Romfix):</label>
+                    <select id="excel_case">
+                        <option value="sheet1">Sheet1 – Series 600 6F2 (voorbeeld)</option>
+                        <option value="sheet2">Sheet2 – Series 800 Type 1 (voorbeeld)</option>
+                    </select>
+                    <div class="param-uitleg">Kiest de Excel-set met standaardwaarden (o.a. E onderliggend en MIF)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="e_ondergrond">E onderliggend / ondergrond (MPa) (Excel):</label>
+                    <input type="number" id="e_ondergrond" value="11" min="1" step="1">
+                    <div class="param-uitleg">In de Excel is dit de “E onderliggend (MPa)” (bijv. 11 of 105 afhankelijk van sheet)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="romfix_dikte">Romfix funderingsdikte (mm):</label>
+                    <input type="number" id="romfix_dikte" value="300" min="100" step="50">
+                    <div class="param-uitleg">Dikker → hogere draagkracht, maar hogere kosten</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sif">SIF (Structural Improvement Factor):</label>
+                    <input type="number" id="sif" value="10" min="1" step="0.1">
+                    <div class="param-uitleg">Hoger = grotere structurele versterking</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mif">MIF (Modulus Improvement Factor):</label>
+                    <input type="number" id="mif" value="4.5" min="1" step="0.1">
+                    <div class="param-uitleg">Hoger = betere gemiddelde stijfheid</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="werkingsdikte">Effectieve werkingsdikte E'Grid (mm):</label>
+                    <input type="number" id="werkingsdikte" value="250" min="100" step="50">
+                    <div class="param-uitleg">Groter bereik → meer profijt van de wapening</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="e_ongewapend_in">E ongewapend (In) (MPa):</label>
+                    <input type="number" id="e_ongewapend_in" value="150" min="50" step="10">
+                </div>
+
+                <div class="form-group">
+                    <label for="e_ongewapend_w">E ongewapend (W) (MPa):</label>
+                    <input type="number" id="e_ongewapend_w" value="33" min="10" step="5">
+                    <div class="param-uitleg">Vaak bepaald door series-type (Capping/RoadBase)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bovenlaag_dikte">Dikte bovenliggende laag / fundering (mm):</label>
+                    <input type="number" id="bovenlaag_dikte" value="1050" min="300" step="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="bovenlaag_e">E-modulus bovenliggende laag (MPa):</label>
+                    <input type="number" id="bovenlaag_e" value="5000" min="2000" step="500">
+                </div>
+
+                <button type="button" onclick="berekenAdvies()">Berekening uitvoeren</button>
+            </form>
+        </section>
+
+        <section id="result" class="result-section" style="display: none;">
+            <h2>Berekend resultaat – Romfix-systeem</h2>
+            <ul id="lagen" class="lagen-list"></ul>
+
+            <div class="summary">
+                <p><strong>Totale constructiedikte:</strong> <span id="totale_dikte"></span> mm</p>
+                <p><strong>Geschatte levensduur:</strong> <span id="geschatte_levensduur"></span> jaar</p>
+            </div>
+
+            <h3>Gedetailleerde tussenresultaten</h3>
+            <div id="berekeningen"></div>
+
+            <h3>Opmerkingen & adviezen</h3>
+            <ul id="opmerkingen" class="opmerkingen-list"></ul>
+
+            <div class="disclaimer">
+                <p>Dit is een **indicatieve rekentool** van Romfix B.V. Gebaseerd op gangbare methoden voor funderingswapening. Voor project-specifieke, bindende berekeningen, sonderingen of verkeersklasse-analyse altijd contact opnemen met Romfix.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <div class="container">
+            <p>© 2026 Romfix B.V. – Duurzame funderings- en verhardingsoplossingen | <a href="https://www.romfix.nl">www.romfix.nl</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
