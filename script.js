@@ -1,3 +1,58 @@
+/**
+ * E₁₀₀-banden: CROW Kennisbank «Elasticiteitsmodulus, E», tabel 4.4.2 (classificatie, NEN 9997-1+C2:2017).
+ * https://kennisbank.crow.nl/public/gastgebruiker/GEO/Construeren_met_grond/Elasticiteitsmodulus,_E/114237
+ *
+ * eRekenSuggestie (MPa): indicatieve stijfheid voor het Romfix-rekenveld — zelfde ordegrootte
+ * als gangbare subfundering-invoer in gelaagde verharding, niet gelijk aan E₁₀₀ bij zeer zachte grond.
+ */
+const BODEM_TYPES = {
+    bodem_veen_sl: { e100Label: '0,1–0,5 MPa (E₁₀₀, band)', eRekenSuggestie: 12 },
+    bodem_veen_mat: { e100Label: '0,5–1,0 MPa (E₁₀₀, band)', eRekenSuggestie: 15 },
+    bodem_klei_org: { e100Label: '0,2–2,0 MPa (E₁₀₀, band; organisch)', eRekenSuggestie: 18 },
+    bodem_klei_sl: { e100Label: '0,5–1,5 MPa (E₁₀₀, band)', eRekenSuggestie: 25 },
+    bodem_klei_mat: { e100Label: '1,0–3,0 MPa (E₁₀₀, band)', eRekenSuggestie: 35 },
+    bodem_klei_vast: { e100Label: '2,0–5,0 MPa (E₁₀₀, band)', eRekenSuggestie: 55 },
+    bodem_zand_silt: { e100Label: '8–35 MPa (E₁₀₀, band; siltig)', eRekenSuggestie: 65 },
+    bodem_zand_los: { e100Label: '5–30 MPa (E₁₀₀, band)', eRekenSuggestie: 75 },
+    bodem_zand_mat: { e100Label: '10–45 MPa (E₁₀₀, band)', eRekenSuggestie: 88 },
+    bodem_zand_vast: { e100Label: '15–75 MPa (E₁₀₀, band)', eRekenSuggestie: 102 },
+    bodem_grind: { e100Label: '15–90 MPa (E₁₀₀, band)', eRekenSuggestie: 115 }
+};
+
+function bodemIsGranulair(slug) {
+    return /^bodem_zand_|^bodem_grind$/.test(slug);
+}
+
+function bodemRekenESuggestie(slug) {
+    const row = BODEM_TYPES[slug];
+    return row ? row.eRekenSuggestie : BODEM_TYPES.bodem_klei_mat.eRekenSuggestie;
+}
+
+/**
+ * Indicatieve stijfheden — CROW Kennisbank «Stijfheid fundering», tabel 37 (ontwerp- en gebruiksbanden MPa);
+ * https://kennisbank.crow.nl/public/gastgebruiker/ASFALT/Asfalt_in_de_weg-_en_waterbouw/Stijfheid_fundering/112542
+ * E_hoofd / E_w: gekozen midden-binnen gangbare gebruiksspeling, passend bij Romfix-rekenvelden (In/W).
+ * γ: indicatief volumiek gewicht (kN/m³), gangbare orde voor ongebonden korrelmaterialen — niet in de formule gebruikt.
+ *
+ * Bims: dichtheid werk verdicht ca. 850–1150 kg/m³ (CROW Handboek funderingsmaterialen — Bims puimsteen); E indicatief
+ * (laag t.o.v. zand/steenslag i.v.m. verbrijzeling en lichte belasting).
+ * Argex: geëxpandeerde / gebakken klei (handelsnaam); indicatieve moduli licht granulaat.
+ * Schuimglas: glasgranulaat, los van Argex; E (In) 80 MPa in deze tool (Romfix-specificatie), E (W) tweede rekentak indicatief.
+ */
+const FUNDERINGS_AGGREGAAT = {
+    agg_custom: { eHoofd: null, eW: null, gamma: null },
+    agg_zand: { eHoofd: 120, eW: 55, gamma: 19.0 },
+    agg_steenslag: { eHoofd: 220, eW: 85, gamma: 20.0 },
+    agg_metselwerk: { eHoofd: 220, eW: 85, gamma: 20.5 },
+    agg_menggranulaat: { eHoofd: 400, eW: 150, gamma: 21.0 },
+    agg_betongranulaat: { eHoofd: 600, eW: 220, gamma: 21.5 },
+    agg_bims: { eHoofd: 80, eW: 45, gamma: 10.0 },
+    agg_schuimglas: { eHoofd: 80, eW: 48, gamma: 2.0 },
+    agg_argex: { eHoofd: 175, eW: 78, gamma: 7.5 },
+    agg_licht_capping: { eHoofd: 150, eW: 33, gamma: 20.0 },
+    agg_licht_roadbase: { eHoofd: 250, eW: 148, gamma: 20.5 }
+};
+
 function berekenAdvies() {
     try {
         // === INPUTS OPHALEN ===
@@ -7,12 +62,12 @@ function berekenAdvies() {
         const levensduur = parseInt(document.getElementById('levensduur').value) || 20;
 
         const series_type = document.getElementById('series_type').value;
-        const excel_case = document.getElementById('excel_case')?.value || 'sheet1';
 
         let romfix_dikte = parseFloat(document.getElementById('romfix_dikte').value) || 300;
         const sif = parseFloat(document.getElementById('sif').value) || 10;
         const mif = parseFloat(document.getElementById('mif').value) || 4.5;
-        const werkingsdikte = parseFloat(document.getElementById('werkingsdikte').value) || 250;
+        const werkingsdikteRaw = parseFloat(document.getElementById('werkingsdikte').value);
+        const werkingsdikte = Math.min(600, Math.max(50, Number.isFinite(werkingsdikteRaw) ? werkingsdikteRaw : 200));
         let e_ongewapend_in = parseFloat(document.getElementById('e_ongewapend_in').value) || 150;
         let e_ongewapend_w = parseFloat(document.getElementById('e_ongewapend_w').value) || 33;
         const bovenlaag_dikte = parseFloat(document.getElementById('bovenlaag_dikte').value) || 1050;
@@ -23,38 +78,25 @@ function berekenAdvies() {
         const e_ondergrond_excel = e_ondergrond_input ? parseFloat(e_ondergrond_input.value) : NaN;
         let e_ondergrond = Number.isFinite(e_ondergrond_excel) && e_ondergrond_excel > 0
             ? e_ondergrond_excel
-            : (ondergrond_type === 'veen_klei' ? 30 : ondergrond_type === 'klei' ? 76 : 100);
+            : bodemRekenESuggestie(ondergrond_type);
 
-        // Excel case defaults (uit meegeleverde sheets)
-        // sheet1: E onderliggend vaak 11, MIF 4.5; sheet2: E onderliggend vaak 105, MIF 4.3
-        if (excel_case === 'sheet2') {
-            if (!Number.isFinite(e_ondergrond_excel) || e_ondergrond_excel <= 0) e_ondergrond = 105;
-        } else {
-            if (!Number.isFinite(e_ondergrond_excel) || e_ondergrond_excel <= 0) e_ondergrond = 11;
-        }
-
-        // Series type defaults (uit Excel)
-        if (series_type === 'capping') {
-            e_ongewapend_w = 33;
-        } else if (series_type === 'roadbase') {
-            e_ongewapend_w = 148;
-        }
+        e_ondergrond = Math.max(8, Math.min(200, e_ondergrond));
 
         // === BASISWAARDEN ===
         const deklaag = 35;
         const onderlaag_theo_min = 25;
         const onderlaag_praktijk_min = 70;
 
-        let zand_dikte = ondergrond_type === 'zand' ? 200 : 300;
+        let zand_dikte = bodemIsGranulair(ondergrond_type) ? 200 : 300;
 
         // Asfalt aanpassing
         const extra_theo = Math.max(0, (verkeersintensiteit - 10) / 10 * 5);
         let onderlaag_theo = onderlaag_theo_min + extra_theo;
         let onderlaag_praktijk = Math.max(onderlaag_praktijk_min, Math.round(onderlaag_theo + 45));
 
-        const romfix_nodig = ondergrond_type !== 'zand';
+        const romfix_nodig = !bodemIsGranulair(ondergrond_type);
         const romfix_omschrijving = romfix_nodig 
-            ? "R’Tex geotextiel + E’Grid + 200 mm R’Cel + menggranulaat" 
+            ? "R’Tex geotextiel + E’Grid + 200 mm R’Cel + funderingsaggregaat" 
             : "Niet nodig";
 
         // === BEREKENINGEN (zoals in Excel) ===
@@ -141,8 +183,8 @@ function berekenAdvies() {
         geschatte_levensduur = Math.round(geschatte_levensduur * 10) / 10;
 
         const levensduur_status = geschatte_levensduur >= levensduur 
-            ? "Voldoet ruimschoots" 
-            : "Te kort – dikkere lagen overwegen";
+            ? "geschat voldoende lang voor uw gekozen jaren" 
+            : "geschat aan de korte kant — overweeg dikkere lagen of minder verkeer";
 
         // Totale dikte
         const totale_dikte = deklaag + onderlaag_praktijk + romfix_dikte + zand_dikte;
@@ -155,12 +197,12 @@ function berekenAdvies() {
         const lagenList = document.getElementById('lagen');
         lagenList.innerHTML = '';
         const lagenArray = [
-            `Deklaag: ${deklaag} mm AC 11 surf DL-B`,
-            `Onderlaag: ${onderlaag_praktijk} mm AC 22 base OL-B (theoretisch ${Math.round(onderlaag_theo)} mm)`,
-            `Funderingslaag: ${romfix_dikte} mm Romfix-systeem (${romfix_omschrijving})`,
-            `Funderingswapening: Geïntegreerd (SIF=${sif}, MIF=${mif})`,
-            `Zandlaag: ${zand_dikte} mm zand`,
-            `Ondergrond stijfheidsmodulus (E): ${e_ondergrond} MPa`
+            `Slijt- / deklaag: ${deklaag} mm (AC 11 surf DL-B)`,
+            `Bind- / onderlaag asfalt: ${onderlaag_praktijk} mm (AC 22 base OL-B; theoretisch minimum ca. ${Math.round(onderlaag_theo)} mm)`,
+            `Romfix-fundering: ${romfix_dikte} mm — ${romfix_omschrijving}`,
+            `Wapening in rekening: ja (draagsteun SIF ${sif}, stijfheid MIF ${mif})`,
+            `Zandbed / tussenlaag: ${zand_dikte} mm`,
+            `Ondergrond — rekenwaarde stijfheid (E-modulus): ${e_ondergrond} MPa`
         ];
         lagenArray.forEach(txt => {
             const li = document.createElement('li');
@@ -174,41 +216,42 @@ function berekenAdvies() {
         // Berekeningen tonen
         const berekeningen = document.getElementById('berekeningen');
         berekeningen.innerHTML = `
-            <div class="calculation-step"><strong>1. Sublaag-modulus (Austroads):</strong><br>
-                E_max: ${Math.round(e_max)} MPa<br>
-                Ratio: ${ratio.toFixed(4)}<br>
-                sub5: ${subs[4]} | sub4: ${subs[3]} | sub3: ${subs[2]} | sub2: ${subs[1]} | sub1: ${subs[0]}<br>
-                Gemiddelde E_niv: ${e_niv} MPa</div>
+            <div class="calculation-step"><strong>1. Stijfheid tussen ondergrond en menggranulaat</strong> (methode Austroads)<br>
+                Maximum in dit model: ${Math.round(e_max)} MPa<br>
+                Verhouding per stap: ${ratio.toFixed(4)}<br>
+                Tussenlagen (van diep naar ondiep): ${subs[4]}, ${subs[3]}, ${subs[2]}, ${subs[1]}, ${subs[0]} MPa<br>
+                Gemiddelde stijfheid daarvan (E<sub>niv</sub>): ${e_niv} MPa</div>
 
-            <div class="calculation-step"><strong>2. Gewapende modulus:</strong><br>
-                E_gewapend = min(${mif} × ${e_niv}, ${e_ongewapend_in} × ${sif}) = ${Math.round(e_gewapend)} MPa</div>
+            <div class="calculation-step"><strong>2. Stijfheid van het gewapende Romfix-deel</strong><br>
+                De rekenregel neemt het gunstigste van twee opties: SIF × gemiddelde sublaag of MIF × stijfheid granulaat (hoofdwaarde).<br>
+                E<sub>gewapend</sub> = min(${sif} × ${e_niv}, ${mif} × ${e_ongewapend_in}) = ${Math.round(e_gewapend)} MPa</div>
 
-            <div class="calculation-step"><strong>3. Laagopbouw:</strong><br>
-                Ong. hoog: ${h_ong_hoog} mm, E=${e_ong} MPa<br>
-                Gewapend: ${h_gew} mm, E=${e_gewapend} MPa<br>
-                Ong. laag: ${h_ong_laag} mm, E=${e_ong} MPa</div>
+            <div class="calculation-step"><strong>3. Verdeling over de Romfix-dikte</strong><br>
+                Ongewapend (boven E&rsquo;Grid / R&rsquo;Cel): ${h_ong_hoog} mm — E = ${e_ong} MPa<br>
+                Gewapend Romfix (E&rsquo;Grid + R&rsquo;Cel): ${h_gew} mm — E = ${e_gewapend} MPa<br>
+                Ongewapend (onder E&rsquo;Grid / R&rsquo;Cel): ${h_ong_laag} mm — E = ${e_ong} MPa</div>
 
-            <div class="calculation-step"><strong>4. Equivalente modulus (Thenn de Barros):</strong><br>
-                Som getransformeerd: ${sum_trans.toFixed(2)}<br>
-                E_eq = ${e_eq_round} MPa</div>
+            <div class="calculation-step"><strong>4. Gemiddelde stijfheid van het hele Romfix-pakket</strong> (Thenn de Barros)<br>
+                Tussenstap (gewogen volgens de formule): ${sum_trans.toFixed(2)}<br>
+                E<sub>eq</sub> = ${e_eq_round} MPa</div>
 
-            <div class="calculation-step"><strong>5. F2-factor (Palmer & Barber):</strong><br>
-                h/r = ${(romfix_dikte / 150).toFixed(2)}, E1/E2 = ${(e_eq / e_ondergrond).toFixed(2)}<br>
-                F2 = ${f2_round}</div>
+            <div class="calculation-step"><strong>5. Correctie voor de zachtere ondergrond eronder</strong> (Palmer &amp; Barber)<br>
+                Verhouding dikte (${(romfix_dikte / 150).toFixed(2)}) en stijfheid Romfix t.o.v. ondergrond (${(e_eq / e_ondergrond).toFixed(2)})<br>
+                Factor F2 = ${f2_round}</div>
 
-            <div class="calculation-step"><strong>6. Gecorrigeerde E_eq:</strong><br>
-                ${e_eq_round} × ${f2_round} = ${e_eq_gecorr} MPa</div>
+            <div class="calculation-step"><strong>6. Stijfheid na correctie</strong> (meegenomen effect van de ondergrond)<br>
+                ${e_eq_round} × ${f2_round} ≈ ${e_eq_gecorr} MPa</div>
         `;
 
         // Opmerkingen
         const opmList = document.getElementById('opmerkingen');
         opmList.innerHTML = '';
         const opmerkingen = [
-            `Levensduur: ${levensduur_status}. Basis + bonus door hogere E_eq.`,
-            `Romfix-systeem: Sterk aanbevolen bij slappe ondergrond.`,
-            `Berekeningen nabootsen Excel (Austroads, Thenn de Barros, Palmer & Barber).`,
-            breedte < 2.75 ? `Smalle weg: houten beschoeiing aanbevolen.` : `Goede stabiliteit verwacht.`,
-            `Indicatief – voor exacte waarden originele Excel gebruiken.`
+            `Levensduur: ${levensduur_status} (inclusief een kleine meerekening als de stijfheid gunstig uitpakt).`,
+            `Bij zachte bodem past Romfix meestal goed; controleer voor uw project altijd bij een ingenieur of Romfix.`,
+            `Deze stappen volgen dezelfde logica als het Romfix-rekenmodel (Austroads, Thenn de Barros, Palmer & Barber).`,
+            breedte < 2.75 ? `Smalle rijbaan: vaak extra maatregelen aan de zijkant (bijvoorbeeld beschoeiing) bespreken.` : `Rijbaanbreedte: in beginsel geen bijzonder kanttekening voor stabiliteit in deze scan.`,
+            `Alle cijfers zijn indicatief; definitieve waarden volgen uit het officiële Romfix-dossier of projectberekening.`
         ];
         opmerkingen.forEach(txt => {
             const li = document.createElement('li');
@@ -220,7 +263,7 @@ function berekenAdvies() {
         resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (error) {
-        alert("Er ging iets mis bij het rekenen.\nControleer of alle velden correct zijn ingevuld.\n\nFout: " + error.message);
+        alert("De berekening kon niet worden afgerond.\nControleer of alle velden geldige getallen bevatten.\n\nTechnische melding: " + error.message);
         console.error("Berekeningsfout:", error);
     }
 }
@@ -242,30 +285,60 @@ document.addEventListener('DOMContentLoaded', () => {
         toggle.setAttribute('aria-expanded', 'false');
     });
 
-    const excelCase = document.getElementById('excel_case');
     const eOndergrond = document.getElementById('e_ondergrond');
     const mif = document.getElementById('mif');
+    const eOngewapendIn = document.getElementById('e_ongewapend_in');
     const eOngewapendW = document.getElementById('e_ongewapend_w');
     const seriesType = document.getElementById('series_type');
+    const funderingsAggregaat = document.getElementById('funderingsaggregaat');
 
-    function applyExcelDefaults() {
-        if (!excelCase) return;
-        const v = excelCase.value;
-        if (v === 'sheet2') {
-            if (eOndergrond) eOndergrond.value = '105';
+    function applySeriesDefaults() {
+        if (!seriesType) return;
+        if (seriesType.value === 'roadbase') {
             if (mif) mif.value = '4.3';
-            if (seriesType && seriesType.value === 'capping') seriesType.value = 'roadbase';
-            if (eOngewapendW) eOngewapendW.value = '148';
         } else {
-            if (eOndergrond) eOndergrond.value = '11';
             if (mif) mif.value = '4.5';
-            if (seriesType && seriesType.value === 'roadbase') seriesType.value = 'capping';
-            if (eOngewapendW) eOngewapendW.value = '33';
         }
+        syncAggregaatMetProductlijn();
     }
 
-    if (excelCase) {
-        excelCase.addEventListener('change', applyExcelDefaults);
-        applyExcelDefaults();
+    function syncAggregaatMetProductlijn() {
+        if (!funderingsAggregaat || !seriesType) return;
+        if (funderingsAggregaat.value !== 'agg_auto_product') return;
+        applyAggregaatPreset();
+    }
+
+    function applyAggregaatPreset() {
+        if (!funderingsAggregaat) return;
+        let key = funderingsAggregaat.value;
+        if (key === 'agg_custom') return;
+        if (key === 'agg_auto_product' && seriesType) {
+            key = seriesType.value === 'roadbase' ? 'agg_licht_roadbase' : 'agg_licht_capping';
+        }
+        const row = FUNDERINGS_AGGREGAAT[key];
+        if (!row || row.eHoofd == null) return;
+        if (eOngewapendIn) eOngewapendIn.value = String(row.eHoofd);
+        if (eOngewapendW) eOngewapendW.value = String(row.eW);
+    }
+
+    if (funderingsAggregaat) {
+        funderingsAggregaat.addEventListener('change', applyAggregaatPreset);
+    }
+
+    function applyBodemStijfheid() {
+        const sel = document.getElementById('ondergrond_type');
+        if (!sel || !eOndergrond) return;
+        eOndergrond.value = String(bodemRekenESuggestie(sel.value));
+    }
+
+    if (seriesType) {
+        seriesType.addEventListener('change', applySeriesDefaults);
+        applySeriesDefaults();
+    }
+
+    const ondergrondSel = document.getElementById('ondergrond_type');
+    if (ondergrondSel) {
+        ondergrondSel.addEventListener('change', applyBodemStijfheid);
+        applyBodemStijfheid();
     }
 });

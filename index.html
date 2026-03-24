@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romfix Versterkings- & Berekeningshulpmiddel</title>
+    <title>Romfix rekentool — indicatieve funderingsberekening</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 </head>
@@ -38,15 +38,15 @@
 
     <div class="document-header">
         <div class="container">
-            <h1>Romfix Versterkings- & Berekeningshulpmiddel</h1>
+            <h1>Romfix rekentool</h1>
             <p class="document-lead">
-                Bereken draagkracht, equivalente modulus, wapeningseffect en levensduur met E'Grid, R'Cel en R'Tex
+                Schat hoe sterk uw opbouw wordt: draagkracht, stijfheid, het effect van E&rsquo;Grid, R&rsquo;Cel en R&rsquo;Tex, en een ruwe levensduurindicatie.
             </p>
             <div class="meta">
-                <p><strong>Type:</strong> Geavanceerd indicatief rekenhulpmiddel</p>
-                <p><strong>Functies:</strong> Equivalente stijfheid, SIF/MIF-impact, laagdikte-optimalisatie, levensduurraming, gewapend vs. ongewapend vergelijking</p>
-                <p><strong>Gebaseerd op:</strong> Romfix-systemen + Austroads, Thenn de Barros, Palmer & Barber methodieken</p>
-                <p><strong>Gebruik:</strong> Voor snelle scans en eerste ontwerpen – definitieve berekeningen altijd via Romfix</p>
+                <p><strong>Wat is dit?</strong> Een indicatieve rekentool — geen vervanging van een projectberekening.</p>
+                <p><strong>Wat krijgt u?</strong> Onder andere stijfheid van het geheel, invloed van wapening (SIF/MIF), laagdiktes en een vergelijking met een ongewapende variant.</p>
+                <p><strong>Waarop gebaseerd?</strong> Romfix-rekenlogica en gangbare methodes uit de funderingswapening (o.a. Austroads, Thenn de Barros, Palmer &amp; Barber).</p>
+                <p><strong>Wanneer Romfix raadplegen?</strong> Bij echte projecten, sonderingen of bindende verkeersklassen.</p>
             </div>
         </div>
     </div>
@@ -54,143 +54,161 @@
     <main class="container">
         <section id="config" class="form-section">
             <div class="uitleg-box">
-                <h3>Hoe werkt deze Romfix-tool?</h3>
-                <p>Dit is een interactief rekenhulpmiddel waarmee je snel de versterkende werking van het Romfix-systeem (E'Grid geogrids, R'Cel geocellen, R'Tex scheidingsdoek) op slappe of matig draagkrachtige ondergrond kunt inschatten.</p>
-                <p>Je voert verkeersbelasting, ondergrondtype en Romfix-parameters in. De tool berekent vervolgens:</p>
+                <h3>Hoe werkt deze tool?</h3>
+                <p>U vult het verkeer, de ondergrond en de Romfix-gegevens in. De tool laat zien wat het systeem (geogrid E&rsquo;Grid, geocel R&rsquo;Cel, doek R&rsquo;Tex) ongeveer doet voor draagkracht op zachte tot matig stevige bodem.</p>
+                <p>Daarna krijgt u onder andere:</p>
                 <ul>
-                    <li>Equivalente stijfheidsmodulus (E_eq) van de gewapende fundering</li>
-                    <li>Effect van wapening (SIF & MIF)</li>
-                    <li>Geschatte levensduur bij de gekozen belasting</li>
-                    <li>Vergelijking met een ongewapende opbouw</li>
-                    <li>Indicatie van benodigde laagdiktes</li>
+                    <li>De <strong>effectieve stijfheid</strong> van de gewapende fundering (technisch: E<sub>eq</sub>)</li>
+                    <li>Hoeveel de <strong>wapening</strong> meetelt (factoren SIF en MIF)</li>
+                    <li>Een <strong>globale schatting</strong> van de levensduur bij dit verkeer</li>
+                    <li>Een <strong>schets van de laagopbouw</strong> en diktes</li>
                 </ul>
-                <p><strong>Belangrijk:</strong> Dit is een indicatieve tool. Voor projectmatige toepassing, sonderingen of verkeersklasseberekeningen altijd een officiële sterkteberekening aanvragen bij Romfix.</p>
+                <p><strong>Let op:</strong> uitkomsten zijn een eerste indicatie. Voor bouwrijp advies, bodemonderzoek of normconforme verkeersaantallen moet Romfix of uw ingenieur het definitief vaststellen.</p>
             </div>
 
-            <h2>Configureer je berekening</h2>
-            <p>Vul de parameters in om de versterking en prestaties van een Romfix-fundering te berekenen.</p>
+            <h2>Uw gegevens</h2>
+            <p>Vul hieronder in wat op uw situatie van toepassing is. Waar u twijfelt, helpen de korte toelichtingen onder de velden.</p>
 
             <form id="adviceForm">
                 <div class="form-group">
-                    <label for="verkeersintensiteit">Verkeersintensiteit (vrachtwagens per werkdag):</label>
-                    <input type="number" id="verkeersintensiteit" value="10" min="1" required title="Gemiddeld aantal zware voertuigen per werkdag per richting">
-                    <div class="param-uitleg">Meer verkeer → dikkere opbouw of kortere levensduur</div>
+                    <label for="verkeersintensiteit">Zware vrachtwagens per werkdag (beide richtingen ongeveer gemiddeld):</label>
+                    <input type="number" id="verkeersintensiteit" value="10" min="1" required title="Gemiddeld aantal zware voertuigen per werkdag">
+                    <div class="param-uitleg">Hoe meer zwaar verkeer, hoe zwaarder de constructie of hoe korter de geschatte levensduur.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="ondergrond_type">Ondergrondtype:</label>
+                    <label for="ondergrond_type">Bodemklasse onder de fundering:</label>
                     <select id="ondergrond_type" required>
-                        <option value="veen_klei">Veen / Klei (zeer slap)</option>
-                        <option value="klei">Klei (slap tot matig)</option>
-                        <option value="zand">Zand (matig tot stevig)</option>
+                        <option value="bodem_veen_sl">Veen, slap — E₁₀₀ indicatief ca. 0,1–0,5 MPa</option>
+                        <option value="bodem_veen_mat">Veen, matig — E₁₀₀ indicatief ca. 0,5–1,0 MPa</option>
+                        <option value="bodem_klei_org">Klei, organisch — E₁₀₀ indicatief ca. 0,2–2,0 MPa</option>
+                        <option value="bodem_klei_sl">Klei, slap — E₁₀₀ indicatief ca. 0,5–1,5 MPa</option>
+                        <option value="bodem_klei_mat" selected>Klei, matig — E₁₀₀ indicatief ca. 1,0–3,0 MPa</option>
+                        <option value="bodem_klei_vast">Klei, vastgepakt — E₁₀₀ indicatief ca. 2,0–5,0 MPa</option>
+                        <option value="bodem_zand_silt">Zand, siltig — E₁₀₀ indicatief ca. 8–35 MPa</option>
+                        <option value="bodem_zand_los">Zand, los — E₁₀₀ indicatief ca. 5–30 MPa</option>
+                        <option value="bodem_zand_mat">Zand, matig — E₁₀₀ indicatief ca. 10–45 MPa</option>
+                        <option value="bodem_zand_vast">Zand, vast — E₁₀₀ indicatief ca. 15–75 MPa</option>
+                        <option value="bodem_grind">Grind — E₁₀₀ indicatief ca. 15–90 MPa</option>
                     </select>
-                    <div class="param-uitleg">Slappere ondergrond → zwaardere Romfix-opbouw nodig</div>
+                    <div class="param-uitleg">Bandbreedtes voor E₁₀₀ volgen de classificatietabel 4.4.2 in de CROW-module «Elasticiteitsmodulus, E» (aansluiting op NEN&nbsp;9997-1). <a href="https://kennisbank.crow.nl/public/gastgebruiker/GEO/Construeren_met_grond/Elasticiteitsmodulus,_E/114237" target="_blank" rel="noopener noreferrer">CROW Kennisbank — Elasticiteitsmodulus</a>. Bij een keuze vult de tool het veld «Stijfheid ondergrond» met een <strong>indicatieve rekenwaarde</strong> in MPa voor dit Romfix-model (niet hetzelfde getal als E₁₀₀). Zand en grind: in deze tool vaak geen Romfix-pakket verplicht; veen/klei: wél. Bij sondering of proef: vul handmatig een passende modulus in.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="breedte">Wegbreedte (m):</label>
+                    <label for="breedte">Rijbaanbreedte (meter):</label>
                     <input type="number" id="breedte" value="2.75" step="0.1" min="1" required>
-                    <div class="param-uitleg">Smalle wegen vragen extra aandacht voor randstabiliteit</div>
+                    <div class="param-uitleg">Smalle rijstroken kunnen extra aandacht aan de kanten van de weg nodig hebben.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="levensduur">Gewenste levensduur (jaren):</label>
+                    <label for="levensduur">Gewenste gebruiksduur (jaren):</label>
                     <input type="number" id="levensduur" value="20" min="1" required>
-                    <div class="param-uitleg">Langer gewenste levensduur → zwaardere constructie</div>
+                    <div class="param-uitleg">Hoe langer het goed moet blijven, hoe strenger de eisen in de schatting.</div>
                 </div>
 
-                <h3>Romfix-systeem parameters</h3>
+                <h3>Romfix-opbouw</h3>
 
                 <div class="form-group">
-                    <label for="series_type">Romfix type:</label>
+                    <label for="series_type">Romfix-productlijn:</label>
                     <select id="series_type">
-                        <option value="capping">Capping (lichtere series)</option>
-                        <option value="roadbase">RoadBase (zwaardere series)</option>
+                        <option value="capping">Capping — lichtere toepassingen</option>
+                        <option value="roadbase">RoadBase — zwaardere toepassingen</option>
                     </select>
-                    <div class="param-uitleg">Kies het systeem dat past bij de toepassing</div>
+                    <div class="param-uitleg">De tool zet standaard de bij dit product passende waarden (onder andere stijfheid ondergrond en MIF). U kunt die daarna handmatig aanpassen.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="excel_case">Excel model (Romfix):</label>
-                    <select id="excel_case">
-                        <option value="sheet1">Sheet1 – Series 600 6F2 (voorbeeld)</option>
-                        <option value="sheet2">Sheet2 – Series 800 Type 1 (voorbeeld)</option>
-                    </select>
-                    <div class="param-uitleg">Kiest de Excel-set met standaardwaarden (o.a. E onderliggend en MIF)</div>
+                    <label for="e_ondergrond">Stijfheid van de ondergrond in de berekening (MPa):</label>
+                    <input type="number" id="e_ondergrond" value="35" min="8" max="200" step="1">
+                    <div class="param-uitleg">Wordt automatisch gezet vanuit de bodemklasse hierboven; pas aan als u betrouwbaardere gegevens heeft (bijv. uit een proef of rapport).</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="e_ondergrond">E onderliggend / ondergrond (MPa) (Excel):</label>
-                    <input type="number" id="e_ondergrond" value="11" min="1" step="1">
-                    <div class="param-uitleg">In de Excel is dit de “E onderliggend (MPa)” (bijv. 11 of 105 afhankelijk van sheet)</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="romfix_dikte">Romfix funderingsdikte (mm):</label>
+                    <label for="romfix_dikte">Dikte van de Romfix-laag (mm):</label>
                     <input type="number" id="romfix_dikte" value="300" min="100" step="50">
-                    <div class="param-uitleg">Dikker → hogere draagkracht, maar hogere kosten</div>
+                    <div class="param-uitleg">Dikkere laag: meestal hogere draagkracht, wel meer materiaal en kosten.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="sif">SIF (Structural Improvement Factor):</label>
+                    <label for="sif">SIF — extra draagsteun door het raster (Support Improvement Factor):</label>
                     <input type="number" id="sif" value="10" min="1" step="0.1">
-                    <div class="param-uitleg">Hoger = grotere structurele versterking</div>
+                    <div class="param-uitleg">Hogere waarde: het geogrid ondersteunt de korrellagen naar Romfix-tabellen sterker.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="mif">MIF (Modulus Improvement Factor):</label>
+                    <label for="mif">MIF — stijfheidsverhoging van het funderingsaggregaat (Modulus Improvement Factor):</label>
                     <input type="number" id="mif" value="4.5" min="1" step="0.1">
-                    <div class="param-uitleg">Hoger = betere gemiddelde stijfheid</div>
+                    <div class="param-uitleg">Hogere waarde: het funderingsaggregaat telt in de berekening stijver mee.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="werkingsdikte">Effectieve werkingsdikte E'Grid (mm):</label>
-                    <input type="number" id="werkingsdikte" value="250" min="100" step="50">
-                    <div class="param-uitleg">Groter bereik → meer profijt van de wapening</div>
+                    <label for="funderingsaggregaat">Funderingsaggregaat (ongewapende laag in Romfix; indicatieve stijfheid en gewicht):</label>
+                    <select id="funderingsaggregaat">
+                        <option value="agg_auto_product" selected>Standaard bij gekozen productlijn (Capping ca. 150/33 MPa; RoadBase ca. 250/148 MPa)</option>
+                        <option value="agg_zand">Zand — E (In) ca. 120 MPa, E (W) ca. 55 MPa, γ ca. 19 kN/m³</option>
+                        <option value="agg_steenslag">Steenslag — E (In) ca. 220 MPa, E (W) ca. 85 MPa, γ ca. 20 kN/m³</option>
+                        <option value="agg_metselwerk">Metselwerkgranulaat — E (In) ca. 220 MPa, E (W) ca. 85 MPa, γ ca. 20,5 kN/m³</option>
+                        <option value="agg_menggranulaat">Menggranulaat — E (In) ca. 400 MPa, E (W) ca. 150 MPa, γ ca. 21 kN/m³</option>
+                        <option value="agg_betongranulaat">Betongranulaat — E (In) ca. 600 MPa, E (W) ca. 220 MPa, γ ca. 21,5 kN/m³</option>
+                        <option value="agg_bims">Bims (puimsteen) — E (In) ca. 80 MPa, E (W) ca. 45 MPa, γ ca. 10 kN/m³ (werk verdicht ca. 850–1150 kg/m³)</option>
+                        <option value="agg_schuimglas">Schuimglas (glasgranulaat) — E (In) 80 MPa, E (W) ca. 48 MPa, γ ca. 2 kN/m³</option>
+                        <option value="agg_argex">Argex (geëxpandeerde klei) — E (In) ca. 175 MPa, E (W) ca. 78 MPa, γ ca. 7,5 kN/m³</option>
+                        <option value="agg_custom">Eigen invoer — onderstaande MPa-waarden handmatig</option>
+                    </select>
+                    <div class="param-uitleg">Indicatieve <strong>E-moduli</strong>: gangbare materialen naar <a href="https://kennisbank.crow.nl/public/gastgebruiker/ASFALT/Asfalt_in_de_weg-_en_waterbouw/Stijfheid_fundering/112542" target="_blank" rel="noopener noreferrer">CROW — Stijfheid fundering (tabel 37)</a>. Bims: o.a. <a href="https://kennisbank.crow.nl/public/gastgebruiker/GWF/Handboek_funderingsmaterialen_in_de_wegenbouw/Bims_(puimsteen)/25407" target="_blank" rel="noopener noreferrer">CROW — Bims</a>. <strong>Schuimglas</strong> en <strong>Argex</strong> zijn verschillende producten (glasgranulaat vs. geëxpandeerde klei). <strong>γ</strong> (kN/m³) alleen ter info. Afwijkingen mogelijk — vul desnoods handmatig in.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="e_ongewapend_in">E ongewapend (In) (MPa):</label>
-                    <input type="number" id="e_ongewapend_in" value="150" min="50" step="10">
+                    <label for="werkingsdikte">Werkingsdikte E&rsquo;Grid + R&rsquo;Cel <em>boven</em> R&rsquo;Cel (mm):</label>
+                    <input type="number" id="werkingsdikte" value="200" min="50" max="600" step="10">
+                    <div class="param-uitleg">De dikte <strong>boven de geocel R&rsquo;Cel</strong> waarin E&rsquo;Grid samen met de vulling in deze tool als &ldquo;gewapend&rdquo; wordt gerekend (dus niet de celhoogte zelf).</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="e_ongewapend_w">E ongewapend (W) (MPa):</label>
+                    <label for="e_ongewapend_in">Stijfheid funderingsaggregaat — hoofdwaarde (In) (MPa):</label>
+                    <input type="number" id="e_ongewapend_in" value="150" min="20" step="10">
+                    <div class="param-uitleg">Stijvere rekentak; o.a. in de MIF-tak (zoals in het Romfix Excel-model &ldquo;In&rdquo;). Vult mee bij keuze hierboven of handmatig.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="e_ongewapend_w">Tweede rekentak voor hetzelfde aggregaat (W) (MPa):</label>
                     <input type="number" id="e_ongewapend_w" value="33" min="10" step="5">
-                    <div class="param-uitleg">Vaak bepaald door series-type (Capping/RoadBase)</div>
+                    <div class="param-uitleg">Lagere bandbreedte die met (In) wordt gemiddeld voor delen van de opbouw. Vult mee bij keuze hierboven of handmatig.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="bovenlaag_dikte">Dikte bovenliggende laag / fundering (mm):</label>
+                    <label for="bovenlaag_dikte">Dikte pakket boven Romfix tot aan de rijbaan (mm):</label>
                     <input type="number" id="bovenlaag_dikte" value="1050" min="300" step="50">
+                    <div class="param-uitleg">Verticale maat vanaf de <strong>bovenkant van het asfalt</strong> (rijvlak) tot aan de <strong>onderkant van de fundering</strong> die direct op Romfix rust — dus alle dek- en dragende lagen boven de Romfix-laag, in één getal.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="bovenlaag_e">E-modulus bovenliggende laag (MPa):</label>
+                    <label for="bovenlaag_e">Stijfheid van dat pakket (asfalt t/m onderkant fundering boven Romfix) (MPa):</label>
                     <input type="number" id="bovenlaag_e" value="5000" min="2000" step="500">
+                    <div class="param-uitleg">Representatieve E-modulus voor hetzelfde pakket als bij het vorige veld — beïnvloedt hoe verkeersbelasting in de berekening naar beneden doorwerkt.</div>
                 </div>
 
-                <button type="button" onclick="berekenAdvies()">Berekening uitvoeren</button>
+                <button type="button" onclick="berekenAdvies()">Resultaat berekenen</button>
             </form>
         </section>
 
         <section id="result" class="result-section" style="display: none;">
-            <h2>Berekend resultaat – Romfix-systeem</h2>
+            <h2>Resultaat — schets van uw opbouw</h2>
             <ul id="lagen" class="lagen-list"></ul>
 
             <div class="summary">
-                <p><strong>Totale constructiedikte:</strong> <span id="totale_dikte"></span> mm</p>
-                <p><strong>Geschatte levensduur:</strong> <span id="geschatte_levensduur"></span> jaar</p>
+                <p><strong>Totale opbouwdikte</strong> (slijtlaag tot en met zandlaag): <span id="totale_dikte"></span> mm</p>
+                <p><strong>Geschatte gebruiksduur</strong> (globaal, geen garantie): <span id="geschatte_levensduur"></span> jaar</p>
             </div>
 
-            <h3>Gedetailleerde tussenresultaten</h3>
+            <h3>Uitleg per stap (voor wie het rekenpad wil zien)</h3>
             <div id="berekeningen"></div>
 
-            <h3>Opmerkingen & adviezen</h3>
+            <h3>Korte punten en aandachtspunten</h3>
             <ul id="opmerkingen" class="opmerkingen-list"></ul>
 
             <div class="disclaimer">
-                <p>Dit is een **indicatieve rekentool** van Romfix B.V. Gebaseerd op gangbare methoden voor funderingswapening. Voor project-specifieke, bindende berekeningen, sonderingen of verkeersklasse-analyse altijd contact opnemen met Romfix.</p>
+                <p><strong>Disclaimer:</strong> dit is een <strong>indicatieve</strong> rekentool van Romfix B.V., gebaseerd op gangbare rekenmethodes voor gewapende funderingen. Voor bindende uitkomsten, bodemonderzoek of verkeersklassen neemt u contact op met Romfix of uw adviseur.</p>
             </div>
         </section>
     </main>
