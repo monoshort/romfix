@@ -1,0 +1,10 @@
+{
+  "name": "romfix-rekentool",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.15.0"
+  }
+}

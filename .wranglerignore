@@ -1,0 +1,8 @@
+# Niet nodig op de openbare site
+sterkteberekingen funderingswapening Romfix (1).xlsx
+*.xlsx
+verhardingstool.py
+.xlsx_extract/
+.git/
+.gitignore
+node_modules/

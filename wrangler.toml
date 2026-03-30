@@ -1,0 +1,9 @@
+# Romfix-rekentool op *.workers.dev (of custom host in Cloudflare-dashboard).
+# Uitrollen: npm run deploy  (na wrangler login)
+name = "yellow-recipe-5484"
+main = "worker.js"
+compatibility_date = "2025-03-30"
+
+[assets]
+directory = "."
+binding = "ASSETS"
