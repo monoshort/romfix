@@ -6,3 +6,9 @@ verhardingstool.py
 .git/
 .gitignore
 node_modules/
+.github/
+deploy.ps1
+package.json
+package-lock.json
+wrangler.toml
+worker.js
