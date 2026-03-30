@@ -1,0 +1,111 @@
+# Gratis statische hosting — één build, meerdere doelen.
+#
+# ALTIJD (na 1×): Settings → Pages → Source: GitHub Actions
+#     → https://<eigenaar>.github.io/romfix/
+#
+# OPTIONEEL — Repository variables (Settings → Secrets and variables → Actions → Variables):
+#   DEPLOY_NETLIFY = true
+#     + Secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID (Netlify dashboard → Site settings → API)
+#     → https://<jouw-site>.netlify.app
+#
+#   DEPLOY_CLOUDFLARE_PAGES = true
+#     + Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID (zelfde als Workers-deploy)
+#     → https://romfix-pages.pages.dev (of eigen *.pages.dev projectnaam hieronder)
+#
+name: Deploy free static hosts
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-free-hosts
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bundel statische site
+        run: |
+          mkdir -p _site
+          cp index.html contact.html script.js styles.css _site/
+          cp -r assets _site/
+          touch _site/.nojekyll
+
+      - name: Site-artifact (voor alle hosts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: _site
+
+  github-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Site ophalen
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: _site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload voor GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy naar GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  netlify:
+    needs: build
+    if: vars.DEPLOY_NETLIFY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: _site
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Deploy naar Netlify
+        run: npx --yes netlify-cli deploy --dir=_site --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+  cloudflare-pages:
+    needs: build
+    if: vars.DEPLOY_CLOUDFLARE_PAGES == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: _site
+
+      - name: Deploy naar Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy _site --project-name=romfix-pages
