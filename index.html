@@ -45,7 +45,7 @@
             <div class="meta">
                 <p><strong>Wat is dit?</strong> Een indicatieve rekentool — geen vervanging van een projectberekening.</p>
                 <p><strong>Wat krijgt u?</strong> Onder andere stijfheid van het geheel, invloed van wapening (SIF/MIF), laagdiktes en een vergelijking met een ongewapende variant.</p>
-                <p><strong>Waarop gebaseerd?</strong> Romfix-rekenlogica en gangbare methodes uit de funderingswapening (o.a. Austroads, Thenn de Barros, Palmer &amp; Barber).</p>
+                <p><strong>Waarop gebaseerd?</strong> Het Romfix Excel-werkboek «sterkteberekingen funderingswapening» als norm voor de rekenketen; aanvullende tabellen en referenties ondersteunen dat waar u dat kiest.</p>
                 <p><strong>Wanneer Romfix raadplegen?</strong> Bij echte projecten, sonderingen of bindende verkeersklassen.</p>
             </div>
         </div>
@@ -63,22 +63,27 @@
                     <li>Een <strong>globale schatting</strong> van de levensduur bij dit verkeer</li>
                     <li>Een <strong>schets van de laagopbouw</strong> en diktes</li>
                 </ul>
-                <p><strong>Let op:</strong> uitkomsten zijn een eerste indicatie. Voor bouwrijp advies, bodemonderzoek of normconforme verkeersaantallen moet Romfix of uw ingenieur het definitief vaststellen.</p>
+                <p><strong>Let op:</strong> uitkomsten zijn een eerste indicatie. De tool volgt de Excel-rekenlogica; afwijkingen t.o.v. uw volledige spreadsheet (twee Romfix-regels tegelijk, celkeuzes) kunnen — controleer kritieke projecten in het bron-Excel.</p>
+                <p>Voor bouwrijp advies, bodemonderzoek of normconforme verkeersaantallen moet Romfix of uw ingenieur het definitief vaststellen.</p>
             </div>
 
             <h2>Uw gegevens</h2>
-            <p>Vul hieronder in wat op uw situatie van toepassing is. Waar u twijfelt, helpen de korte toelichtingen onder de velden.</p>
+            <p>Vul hieronder in wat op uw situatie van toepassing is. Waar u twijfelt, helpen de korte toelichtingen onder de velden. <strong>Gele vakken</strong> zijn bewust gemarkeerde invoervelden voor uw project — vaste of afgeleide parameters (zoals SIF volgens standaard, of de werkingsdikte) blijven normaal wit/read-only.</p>
 
             <form id="adviceForm">
                 <div class="form-group">
                     <label for="verkeersintensiteit">Zware vrachtwagens per werkdag (beide richtingen ongeveer gemiddeld):</label>
-                    <input type="number" id="verkeersintensiteit" value="10" min="1" required title="Gemiddeld aantal zware voertuigen per werkdag">
+                    <input type="number" id="verkeersintensiteit" class="input-klant" value="10" min="1" required title="Gemiddeld aantal zware voertuigen per werkdag">
                     <div class="param-uitleg">Hoe meer zwaar verkeer, hoe zwaarder de constructie of hoe korter de geschatte levensduur.</div>
                 </div>
 
                 <div class="form-group">
                     <label for="ondergrond_type">Bodemklasse onder de fundering:</label>
-                    <select id="ondergrond_type" required>
+                    <select id="ondergrond_type" class="input-klant" required>
+                        <option value="bodem_rf_veen_slaklei">Romfix-referentie: veen / slappe klei — E in berekening ca. 30 MPa</option>
+                        <option value="bodem_rf_klei_vast">Romfix-referentie: vaste klei — E in berekening ca. 50 MPa</option>
+                        <option value="bodem_rf_zand">Romfix-referentie: zand — E in berekening ca. 100 MPa</option>
+                        <option value="bodem_rf_zand_gegradeerd">Romfix-referentie: goed gegradeerd zand — E in berekening ca. 120 MPa</option>
                         <option value="bodem_veen_sl">Veen, slap — E₁₀₀ indicatief ca. 0,1–0,5 MPa</option>
                         <option value="bodem_veen_mat">Veen, matig — E₁₀₀ indicatief ca. 0,5–1,0 MPa</option>
                         <option value="bodem_klei_org">Klei, organisch — E₁₀₀ indicatief ca. 0,2–2,0 MPa</option>
@@ -96,62 +101,123 @@
 
                 <div class="form-group">
                     <label for="breedte">Rijbaanbreedte (meter):</label>
-                    <input type="number" id="breedte" value="2.75" step="0.1" min="1" required>
+                    <input type="number" id="breedte" class="input-klant" value="2.75" step="0.1" min="1" required>
                     <div class="param-uitleg">Smalle rijstroken kunnen extra aandacht aan de kanten van de weg nodig hebben.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="levensduur">Gewenste gebruiksduur (jaren):</label>
-                    <input type="number" id="levensduur" value="20" min="1" required>
-                    <div class="param-uitleg">Hoe langer het goed moet blijven, hoe strenger de eisen in de schatting.</div>
+                    <label for="levensduur">Gewenste gebruiksduur (jaren, alleen projectreferentie):</label>
+                    <input type="number" id="levensduur" class="input-klant" value="20" min="1">
+                    <div class="param-uitleg">Er wordt <strong>geen</strong> aparte levensduur-macro in deze tool uitgerekend ten opzichte van normplaten; het veld dient als <strong>projectreferentie</strong> (doeljaren) in de indicatieve vergelijking. Koppeling aan een andere module of officieel OIA-hoofdstuk levensduur is hier <strong>niet</strong> ingebouwd — dat blijft extern/handmatig.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bereken_doel">Wat wilt u vooral beoordelen?</label>
+                    <select id="bereken_doel" class="input-klant">
+                        <option value="romfix_stijfheid" selected>Draagkracht / stijfheid Romfix-pakket (standaard gebruik tool)</option>
+                        <option value="asfalt_dikte">Indicatie: benodigde asfalt- of totale pakketdikte (met vuistregels in het resultaat)</option>
+                        <option value="elementen">Elementenverharding of hogere E-modulus boven Romfix</option>
+                    </select>
+                    <div class="param-uitleg">Maakt uw <strong>rekendoel</strong> expliciet; de Romfix-kern blijft gelijk, het resultaat krijgt gerichte toelichting. Gebruik daarnaast <em>Rekenmethode</em> voor Romfix versus OIA-indicatie — dezelfde invoer waar mogelijk voor beide.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="rekenmethode">Rekenmethode:</label>
+                    <select id="rekenmethode" class="input-klant">
+                        <option value="romfix" selected>Romfix-berekening (huidige methode)</option>
+                        <option value="oia">OIA-indicatie (vereenvoudigd)</option>
+                        <option value="beide">Vergelijk Romfix + OIA-indicatie</option>
+                    </select>
+                    <div class="param-uitleg">Kies welke uitkomst u wilt zien. OIA is hier bewust <strong>gekoppeld aan dezelfde invoer</strong> waar dat zinvol is; het is nog steeds een praktische indicatie, geen officiële OIA-berekening.</div>
                 </div>
 
                 <h3>Romfix-opbouw</h3>
 
                 <div class="form-group">
                     <label for="series_type">Romfix-productlijn:</label>
-                    <select id="series_type">
+                    <select id="series_type" class="input-klant">
                         <option value="capping">Capping — lichtere toepassingen</option>
                         <option value="roadbase">RoadBase — zwaardere toepassingen</option>
                     </select>
-                    <div class="param-uitleg">De tool zet standaard de bij dit product passende waarden (onder andere stijfheid ondergrond en MIF). U kunt die daarna handmatig aanpassen.</div>
+                    <div class="param-uitleg">Aansluiting op het Excel-tabblad <strong>Capping_Romfix</strong> resp. <strong>RoadBase_Romfix</strong>. Standaard wordt het bij dat tabblad horende funderingsaggregaat gekozen (tenzij u een ander materiaal selecteert). MIF volgt standaard het werkboek (cel E19); optioneel gebruikt u de aanvullende Romfix MIF-tabel.</div>
                 </div>
 
                 <div class="form-group">
                     <label for="e_ondergrond">Stijfheid van de ondergrond in de berekening (MPa):</label>
-                    <input type="number" id="e_ondergrond" value="35" min="8" max="200" step="1">
+                    <input type="number" id="e_ondergrond" class="input-klant" value="35" min="8" max="200" step="1">
                     <div class="param-uitleg">Wordt automatisch gezet vanuit de bodemklasse hierboven; pas aan als u betrouwbaardere gegevens heeft (bijv. uit een proef of rapport).</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="romfix_dikte">Dikte van de Romfix-laag (mm):</label>
-                    <input type="number" id="romfix_dikte" value="300" min="100" step="50">
-                    <div class="param-uitleg">Dikkere laag: meestal hogere draagkracht, wel meer materiaal en kosten.</div>
+                    <label for="romfix_dikte">Dikte van de Romfix-laag (mm, totaalpakket R&rsquo;Tex + E&rsquo;Grid + R&rsquo;Cel + vulling):</label>
+                    <input type="number" id="romfix_dikte" class="input-klant" value="300" min="100" step="50">
+                    <div class="param-uitleg">Dit is de <strong>lokale constructieve hoogte</strong> van het Romfix-systeem: geotextiel (R&rsquo;Tex), geogrid (E&rsquo;Grid), de gekozen GEO-cel (R&rsquo;Cel; vaak 150 of 200 mm wandhoogte) en de daarin en erboven aangebrachte <strong>korrelige vulling</strong> tot aan de teken-/werkhoogte van de Romfix-fundering. De <strong>werkingsdikte</strong> (hieronder, max. 150 mm) is apart: het betreft de zone <em>boven</em> de cel waarin grid + vulling in het model volledig als gewapend meetellen — niet de celwand zelf. Grotere Romfix-laagdikte verandert de verdeling gewapend/ongewapend en de F2-hoogte; zie ook de Excel-keten.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="sif">SIF — extra draagsteun door het raster (Support Improvement Factor):</label>
-                    <input type="number" id="sif" value="10" min="1" step="0.1">
-                    <div class="param-uitleg">Hogere waarde: het geogrid ondersteunt de korrellagen naar Romfix-tabellen sterker.</div>
+                    <label for="wapening_config">Wapeningsconfiguratie (rekentechnische keuze):</label>
+                    <select id="wapening_config" class="input-klant">
+                        <option value="grid_only">Alleen GeoGrid (SIF 5,0)</option>
+                        <option value="cell_only">Alleen GeoCell (SIF 7,6)</option>
+                        <option value="grid_cell" selected>GeoGrid + GeoCell (Romfix-systeem, SIF 10,0)</option>
+                    </select>
+                    <div class="param-uitleg">Rekentechisch sluit grid- en celcombinaties aan op het werkboek. <strong>SIF</strong> is in de spreadsheet <strong>per wapeningsconfiguratie vast</strong> (Chris: GeoGrid 5,0 — GeoCell 7,6 — combinatie 10,0); <strong>MIF</strong> hangt sterk van ondergrond en invulling af. Conceptueel heeft GeoGrid de grootste invloed op SIF; bij zachtere bodem is in de praktijk vaker een zwaardere grid/cel-combinatie nodig (zie onder «SIF-aanpassing» voor een optionele trend, een-op-een Excel-blok blijft «vast»).</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="mif">MIF — stijfheidsverhoging van het funderingsaggregaat (Modulus Improvement Factor):</label>
-                    <input type="number" id="mif" value="4.5" min="1" step="0.1">
-                    <div class="param-uitleg">Hogere waarde: het funderingsaggregaat telt in de berekening stijver mee.</div>
+                    <label for="geocel_type">GEO-cel in uw project (informatief voor omschrijving):</label>
+                    <select id="geocel_type" class="input-klant">
+                        <option value="rcel_150" selected>R&rsquo;Cel — kenmerkende hoogte ca. 150 mm (gangbaar)</option>
+                        <option value="rcel_200">R&rsquo;Cel — kenmerkende hoogte ca. 200 mm</option>
+                    </select>
+                    <div class="param-uitleg">De <strong>rekenwerkingsdikte</strong> voor het gewapende stuk boven de cel blijft in deze versie <strong>maximaal 150 mm</strong> en vast; andere celhoogten: controleer altijd in het volledige Excel-model of met Romfix.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sif_mode">SIF: ondergrond (Excel vs. indicatief):</label>
+                    <select id="sif_mode" class="input-klant">
+                        <option value="vast" selected>Vast — Chris/Excel 5 / 7,6 / 10 per configuratie (norm voor gelijkheid aan werkboek)</option>
+                        <option value="indicatief_bodem">Indicatief — zachtere ondergrond iets hogere SIF, stijvere iets lager (trend; ± ca. 8–12 %)</option>
+                    </select>
+                    <div class="param-uitleg">Standaard houdt u de tool gelijk aan de vaste SIF-waarden uit de meeting/Excel. De tweede optie is een <strong>simplistische hulp</strong> bij het besproken inzicht «slapper bodem → ruimte voor hogere effectieve draagsteun» — geen norm.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sif">SIF (vast of indicatief — zie modus hierboven):</label>
+                    <input type="number" id="sif" value="10.0" min="1" step="0.1" readonly>
+                    <div class="param-uitleg">Vaste waarden: GeoGrid 5,0; GeoCell 7,6; GeoGrid+GeoCell 10,0.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mif_source">MIF-bron (norm = Excel-werkboek):</label>
+                    <select id="mif_source" class="input-klant">
+                        <option value="excel" selected>Excel — standaard E19 (Capping 4,5 / RoadBase 4,3)</option>
+                        <option value="tabel">Aanvullende Romfix MIF-tabel (2D: onderbouw + invulling)</option>
+                    </select>
+                    <div class="param-uitleg">Het Excel-bestand bepaalt de <strong>standaard</strong> MIF per productlijn (eerste wapeningsrij). In Excel staat een tweede rij (E20) met Capping 4,8 / RoadBase 3,8 — gebruik daarvoor <em>MIF handmatig</em>. De MIF-tabel is bedoeld als ondersteunend inzicht, niet als impliciete vervanging van het werkboek.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mif">MIF — Modulus Improvement Factor:</label>
+                    <input type="number" id="mif" class="input-klant" value="4.5" min="1" max="20" step="0.01" readonly>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="mif_manual_override">
+                        <label for="mif_manual_override" class="checkbox-label">MIF handmatig overschrijven (project/rapport of tweede Excel-rij E20)</label>
+                    </div>
+                    <div class="param-uitleg">Waarde wordt gevuld vanuit de gekozen MIF-bron (of uw handmatige invoer). Bij «MIF-tabel»: interpolatie op roosters R&rsquo;Cel / R&rsquo;Cel+E&rsquo;Grid (meewerkende hoogte max. 300 mm); alleen GeoGrid: indicatieve schaling op R&rsquo;Cel-tabel.</div>
                 </div>
 
                 <div class="form-group">
                     <label for="funderingsaggregaat">Funderingsaggregaat (ongewapende laag in Romfix; indicatieve stijfheid en gewicht):</label>
-                    <select id="funderingsaggregaat">
+                    <select id="funderingsaggregaat" class="input-klant">
                         <option value="agg_auto_product" selected>Standaard bij gekozen productlijn (Capping ca. 150/33 MPa; RoadBase ca. 250/148 MPa)</option>
                         <option value="agg_zand">Zand — E (In) ca. 120 MPa, E (W) ca. 55 MPa, γ ca. 19 kN/m³</option>
-                        <option value="agg_steenslag">Steenslag — E (In) ca. 220 MPa, E (W) ca. 85 MPa, γ ca. 20 kN/m³</option>
-                        <option value="agg_metselwerk">Metselwerkgranulaat — E (In) ca. 220 MPa, E (W) ca. 85 MPa, γ ca. 20,5 kN/m³</option>
-                        <option value="agg_menggranulaat">Menggranulaat — E (In) ca. 400 MPa, E (W) ca. 150 MPa, γ ca. 21 kN/m³</option>
-                        <option value="agg_betongranulaat">Betongranulaat — E (In) ca. 600 MPa, E (W) ca. 220 MPa, γ ca. 21,5 kN/m³</option>
-                        <option value="agg_bims">Bims (puimsteen) — E (In) ca. 80 MPa, E (W) ca. 45 MPa, γ ca. 10 kN/m³ (werk verdicht ca. 850–1150 kg/m³)</option>
-                        <option value="agg_schuimglas">Schuimglas (glasgranulaat) — E (In) 80 MPa, E (W) ca. 48 MPa, γ ca. 2 kN/m³</option>
+                        <option value="agg_steenslag">Steenslag / steenmengsels (Romfix-ref.) — E (In) 150 MPa, E (W) ca. 75 MPa, γ ca. 20 kN/m³</option>
+                        <option value="agg_metselwerk">Metselwerkpuin (Romfix-ref.) — E (In) 150 MPa, E (W) ca. 75 MPa, γ ca. 20,5 kN/m³</option>
+                        <option value="agg_menggranulaat">Menggranulaat (Romfix-ref.) — E (In) 400 MPa, E (W) ca. 150 MPa vrij; modus Vast (Chris) zet W op 300 MPa, γ ca. 21 kN/m³</option>
+                        <option value="agg_betongranulaat">Hydraulisch menggranulaat / betongranulaat (Romfix-ref.) — E (In) 600 MPa, E (W) ca. 220 MPa, γ ca. 21,5 kN/m³</option>
+                        <option value="agg_bims">BIMS / Bims (Romfix-ref.) — E (In) 125 MPa, E (W) ca. 55 MPa, γ ca. 10 kN/m³</option>
+                        <option value="agg_schuimglas">Glasschuim / schuimglas (Romfix-ref.) — E (In) 50 MPa, E (W) ca. 28 MPa, γ ca. 2 kN/m³</option>
                         <option value="agg_argex">Argex (geëxpandeerde klei) — E (In) ca. 175 MPa, E (W) ca. 78 MPa, γ ca. 7,5 kN/m³</option>
                         <option value="agg_custom">Eigen invoer — onderstaande MPa-waarden handmatig</option>
                     </select>
@@ -159,33 +225,42 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="werkingsdikte">Werkingsdikte E&rsquo;Grid + R&rsquo;Cel <em>boven</em> R&rsquo;Cel (mm):</label>
-                    <input type="number" id="werkingsdikte" value="200" min="50" max="600" step="10">
-                    <div class="param-uitleg">De dikte <strong>boven de geocel R&rsquo;Cel</strong> waarin E&rsquo;Grid samen met de vulling in deze tool als &ldquo;gewapend&rdquo; wordt gerekend (dus niet de celhoogte zelf).</div>
+                    <label for="werkingsdikte">Werkingsdikte E&rsquo;Grid + R&rsquo;Cel boven R&rsquo;Cel (mm):</label>
+                    <input type="number" id="werkingsdikte" value="150" min="150" max="150" step="1" readonly>
+                    <div class="param-uitleg">Maximaal <strong>150 mm</strong> (eerdere discussie noemde kort 200 mm; hier geldt <strong>150 mm</strong>). Dit is de dikte <strong>boven</strong> de geocel waarin geogrid + vulling in het model volledig gewapend meetellen — <strong>automatisch</strong>, geen klantinvoer.</div>
                 </div>
 
                 <div class="form-group">
                     <label for="e_ongewapend_in">Stijfheid funderingsaggregaat — hoofdwaarde (In) (MPa):</label>
-                    <input type="number" id="e_ongewapend_in" value="150" min="20" step="10">
-                    <div class="param-uitleg">Stijvere rekentak; o.a. in de MIF-tak (zoals in het Romfix Excel-model &ldquo;In&rdquo;). Vult mee bij keuze hierboven of handmatig.</div>
+                    <input type="number" id="e_ongewapend_in" class="input-klant" value="150" min="20" step="10">
+                    <div class="param-uitleg">Stijvere rekentak; o.a. in de MIF-tak (zoals in het Romfix Excel-model «In»). Advies: altijd een <strong>realistische ontwerpwaarde</strong> invoeren; gebruik modus <em>Vrij</em> voor niet-standaard materialen (waardes lopen dan niet vast).</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="e_ongewapend_w_mode">W-waarde modus (tweede rekentak):</label>
+                    <select id="e_ongewapend_w_mode" class="input-klant">
+                        <option value="vast" selected>Vast — productlijn standaard (33 / 148 MPa) of menggranulaat Chris-praktijk (300 MPa)</option>
+                        <option value="vrij">Vrij — handmatige W-waarde (aanbevolen voor niet-menggranulaat of eigen meetdata)</option>
+                    </select>
+                    <div class="param-uitleg">Bij <strong>Nederlands menggranulaat</strong> in ontwerp bij Romfix wordt in de praktijk vaak modus <strong>Vast</strong> gebruikt met <strong>W = 300 MPa</strong> (Chris) op de tweede tak; bij keuze <strong>Standaard bij productlijn</strong> blijft W gelijk aan het Excel-profiel (Capping/RoadBase). Gebruik <strong>Vrij</strong> als u zelf een KIWA-/rapportwaarde wilt — vaak <strong>lagere</strong> banden dan Menggranulaat-voorbeelden.</div>
                 </div>
 
                 <div class="form-group">
                     <label for="e_ongewapend_w">Tweede rekentak voor hetzelfde aggregaat (W) (MPa):</label>
-                    <input type="number" id="e_ongewapend_w" value="33" min="10" step="5">
-                    <div class="param-uitleg">Lagere bandbreedte die met (In) wordt gemiddeld voor delen van de opbouw. Vult mee bij keuze hierboven of handmatig.</div>
+                    <input type="number" id="e_ongewapend_w" class="input-klant" value="33" min="10" step="5">
+                    <div class="param-uitleg">Gemiddelde In/W gaat naar de Austroads-stap. Bij <strong>Vast</strong> + menggranulaat wordt automatisch <strong>300 MPa</strong> gezet; bij <strong>Vast</strong> + productlijnkoppeling worden de werkboek-W&rsquo;s (33 / 148) gezet. Anders: vrije invoer.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="bovenlaag_dikte">Dikte pakket boven Romfix tot aan de rijbaan (mm):</label>
-                    <input type="number" id="bovenlaag_dikte" value="1050" min="300" step="50">
-                    <div class="param-uitleg">Verticale maat vanaf de <strong>bovenkant van het asfalt</strong> (rijvlak) tot aan de <strong>onderkant van de fundering</strong> die direct op Romfix rust — dus alle dek- en dragende lagen boven de Romfix-laag, in één getal.</div>
+                    <label for="bovenlaag_dikte">Totale fundatie-opbouwdikte t/m rijbaan (mm, inclusief Romfix):</label>
+                    <input type="number" id="bovenlaag_dikte" class="input-klant" value="1050" min="300" step="50">
+                    <div class="param-uitleg">Eén verticale maat: van de <strong>bovenkant van het rijvlak (asfalt)</strong> onder tot en met de onderzijde van de fundering die <strong>direct op Romfix</strong> rust, met de <strong>Romfix-laagdikte inbegrepen</strong> in dat totaal (zoals in de bespreking vastgehouden voor deze tool).</div>
                 </div>
 
                 <div class="form-group">
                     <label for="bovenlaag_e">Stijfheid van dat pakket (asfalt t/m onderkant fundering boven Romfix) (MPa):</label>
-                    <input type="number" id="bovenlaag_e" value="5000" min="2000" step="500">
-                    <div class="param-uitleg">Representatieve E-modulus voor hetzelfde pakket als bij het vorige veld — beïnvloedt hoe verkeersbelasting in de berekening naar beneden doorwerkt.</div>
+                    <input type="number" id="bovenlaag_e" class="input-klant" value="5000" min="2000" step="500">
+                    <div class="param-uitleg">Representatieve E-modulus voor <strong>hetzelfde totale pakket</strong> als het vorige veld (dus inclusief Romfix-lagen in die verticale maat) — bepaalt hoe de verkeersbelasting naar beneden wordt doorverweven in de Austroads-stap.</div>
                 </div>
 
                 <button type="button" onclick="berekenAdvies()">Resultaat berekenen</button>
@@ -194,12 +269,15 @@
 
         <section id="result" class="result-section" style="display: none;">
             <h2>Resultaat — schets van uw opbouw</h2>
+            <div id="method_result"></div>
             <ul id="lagen" class="lagen-list"></ul>
 
             <div class="summary">
                 <p><strong>Totale opbouwdikte</strong> (slijtlaag tot en met zandlaag): <span id="totale_dikte"></span> mm</p>
                 <p><strong>Geschatte gebruiksduur</strong> (globaal, geen garantie): <span id="geschatte_levensduur"></span> jaar</p>
             </div>
+
+            <div id="zetting_note" class="zetting-note" aria-live="polite"></div>
 
             <h3>Uitleg per stap (voor wie het rekenpad wil zien)</h3>
             <div id="berekeningen"></div>

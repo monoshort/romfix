@@ -264,6 +264,24 @@ h2 {
     margin-bottom: 1.6rem;
 }
 
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: auto;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+.checkbox-row .checkbox-label {
+    display: inline;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
 label {
     display: block;
     margin-bottom: 0.6rem;
@@ -306,6 +324,37 @@ input:focus, select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(120, 182, 0, 0.22), 0 0 0 8px rgba(27, 42, 74, 0.10);
     background: #ffffff;
+}
+
+/* Klant-invulvelden (conventie uit projectnotities) */
+input.input-klant,
+select.input-klant {
+    background: #fffce8;
+    border-color: #e6dc9a;
+}
+
+input.input-klant:focus,
+select.input-klant:focus {
+    background: #fffef5;
+}
+
+.workflow-note {
+    border-left: 4px solid rgba(120, 182, 0, 0.55);
+    padding-left: 1rem;
+}
+
+.zetting-note {
+    margin-top: 1.25rem;
+    padding: 1rem 1.15rem;
+    background: rgba(27, 42, 74, 0.06);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.zetting-note p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
 }
 
 button {
@@ -387,6 +436,31 @@ button:active {
     border-radius: var(--radius-md);
     font-size: 0.95rem;
     color: var(--text);
+}
+
+/* Rekenstappen layout (maakt stap 3/4 ook goed leesbaar) */
+#berekeningen {
+    margin-top: 1.25rem;
+}
+
+.calculation-step {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+    margin: 0 0 0.95rem 0;
+    box-shadow: 0 8px 22px rgba(17, 24, 39, 0.04);
+    line-height: 1.55;
+}
+
+.calculation-step strong {
+    display: inline-block;
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+}
+
+.calculation-step br {
+    line-height: 1.65;
 }
 
 /* Uitleg boxes */
