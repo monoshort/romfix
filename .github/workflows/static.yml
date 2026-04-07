@@ -1,12 +1,10 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
+# Uitgeschakeld voor push: anders race met deploy-free-hosts.yml (smalle _site
+# overschrijft dan een volledige checkout of omgekeerd → 404 op ontbrekende bestanden).
+# Pages wordt gedeployed via deploy-free-hosts.yml.
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
