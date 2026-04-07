@@ -24,6 +24,7 @@
                 <ul id="primaryNav" class="nav-links">
                     <li><a href="#config">Tool</a></li>
                     <li><a href="#result">Resultaat</a></li>
+                    <li><a href="excel-werkboek.html">Excel-werkboek</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
@@ -45,8 +46,9 @@
             <div class="meta">
                 <p><strong>Wat is dit?</strong> Een indicatieve rekentool — geen vervanging van een projectberekening.</p>
                 <p><strong>Wat krijgt u?</strong> Onder andere stijfheid van het geheel, invloed van wapening (SIF/MIF), laagdiktes en een vergelijking met een ongewapende variant.</p>
-                <p><strong>Waarop gebaseerd?</strong> Het Romfix Excel-werkboek «sterkteberekingen funderingswapening» als norm voor de rekenketen; aanvullende tabellen en referenties ondersteunen dat waar u dat kiest.</p>
+                <p><strong>Waarop gebaseerd?</strong> De <strong>zelfde kernberekening</strong> als het Romfix Excel-werkboek «sterkteberekingen funderingswapening» (o.a. Austroads, SIF/MIF, Thenn de Barros, Palmer &amp; Barber). <strong>Daarna</strong> kiest u optioneel aanvullingen: OIA-indicatie, 2D MIF-tabel bodem/vulstof, indicatieve SIF-trend. Eerdere toolversie: de fundatiedikte boven Romfix kon inclusief Romfix zijn ingevuld — sluit nu aan op Excel: <strong>alleen het pakket boven de Romfix-laaglagen</strong>.</p>
                 <p><strong>Wanneer Romfix raadplegen?</strong> Bij echte projecten, sonderingen of bindende verkeersklassen.</p>
+                <p><strong>Exact zoals het Excel-werkboek?</strong> Gebruik de aparte pagina <a href="excel-werkboek.html">Excel-werkboek</a> — de indicatieve tool op deze pagina blijft bewust compacter.</p>
             </div>
         </div>
     </div>
@@ -149,9 +151,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="romfix_dikte">Dikte van de Romfix-laag (mm, totaalpakket R&rsquo;Tex + E&rsquo;Grid + R&rsquo;Cel + vulling):</label>
+                    <label for="romfix_dikte">Eerste Romfix-laag (mm) — Excel «Invoer wegconstructie» eerste Romfix-rij:</label>
                     <input type="number" id="romfix_dikte" class="input-klant" value="300" min="100" step="50">
-                    <div class="param-uitleg">Dit is de <strong>lokale constructieve hoogte</strong> van het Romfix-systeem: geotextiel (R&rsquo;Tex), geogrid (E&rsquo;Grid), de gekozen GEO-cel (R&rsquo;Cel; vaak 150 of 200 mm wandhoogte) en de daarin en erboven aangebrachte <strong>korrelige vulling</strong> tot aan de teken-/werkhoogte van de Romfix-fundering. De <strong>werkingsdikte</strong> (hieronder, max. 150 mm) is apart: het betreft de zone <em>boven</em> de cel waarin grid + vulling in het model volledig als gewapend meetellen — niet de celwand zelf. Grotere Romfix-laagdikte verandert de verdeling gewapend/ongewapend en de F2-hoogte; zie ook de Excel-keten.</div>
+                    <div class="param-uitleg">Totale <strong>constructieve hoogte</strong> van dat Romfix-blok (R&rsquo;Tex + E&rsquo;Grid + R&rsquo;Cel + vulling). <strong>Werkingsdikte</strong> (effectief gewapend) vult u verderop in, zoals de gele cellen bij «Invoer funderingswapening».</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="romfix_dikte_2">Tweede Romfix-laag (mm), optioneel — Excel volgende rij onder de eerste Romfix:</label>
+                    <input type="number" id="romfix_dikte_2" class="input-klant" value="0" min="0" step="50" title="0 = enkele Romfix-laag zoals eenvoudige invoer">
+                    <div class="param-uitleg">Vul <strong>0</strong> als u één Romfix-pakket heeft. Vul een dikte (bijv. 300) voor een <strong>gestapelde</strong> tweede laag; dan geldt een tweede wapeningsrij met eigen werkingsdikte en MIF (Excel rij 20 / E20).</div>
                 </div>
 
                 <div class="form-group">
@@ -170,7 +178,7 @@
                         <option value="rcel_150" selected>R&rsquo;Cel — kenmerkende hoogte ca. 150 mm (gangbaar)</option>
                         <option value="rcel_200">R&rsquo;Cel — kenmerkende hoogte ca. 200 mm</option>
                     </select>
-                    <div class="param-uitleg">De <strong>rekenwerkingsdikte</strong> voor het gewapende stuk boven de cel blijft in deze versie <strong>maximaal 150 mm</strong> en vast; andere celhoogten: controleer altijd in het volledige Excel-model of met Romfix.</div>
+                    <div class="param-uitleg">Alleen ter omschrijving in het resultaat. Rekening gebruikt uw ingevoerde <strong>werkingsdiktes</strong> per rij (zoals in Excel).</div>
                 </div>
 
                 <div class="form-group">
@@ -194,17 +202,26 @@
                         <option value="excel" selected>Excel — standaard E19 (Capping 4,5 / RoadBase 4,3)</option>
                         <option value="tabel">Aanvullende Romfix MIF-tabel (2D: onderbouw + invulling)</option>
                     </select>
-                    <div class="param-uitleg">Het Excel-bestand bepaalt de <strong>standaard</strong> MIF per productlijn (eerste wapeningsrij). In Excel staat een tweede rij (E20) met Capping 4,8 / RoadBase 3,8 — gebruik daarvoor <em>MIF handmatig</em>. De MIF-tabel is bedoeld als ondersteunend inzicht, niet als impliciete vervanging van het werkboek.</div>
+                    <div class="param-uitleg">Het Excel-bestand bepaalt de <strong>standaard</strong> MIF per productlijn (eerste wapeningsrij). Bij een <strong>tweede Romfix-laag</strong> wordt automatisch de tweede werkboek-MIF gebruikt (Capping 4,8 / RoadBase 3,8), tenzij u die handmatig overschrijft. De MIF-tabel in de tool is een <strong>aanvulling</strong> op het werkboek.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="mif">MIF — Modulus Improvement Factor:</label>
+                    <label for="mif">MIF — eerste wapeningsrij (zoals Excel, standaard E19):</label>
                     <input type="number" id="mif" class="input-klant" value="4.5" min="1" max="20" step="0.01" readonly>
                     <div class="checkbox-row">
                         <input type="checkbox" id="mif_manual_override">
-                        <label for="mif_manual_override" class="checkbox-label">MIF handmatig overschrijven (project/rapport of tweede Excel-rij E20)</label>
+                        <label for="mif_manual_override" class="checkbox-label">MIF eerste rij handmatig (project / afwijkende Excel-keuze)</label>
                     </div>
-                    <div class="param-uitleg">Waarde wordt gevuld vanuit de gekozen MIF-bron (of uw handmatige invoer). Bij «MIF-tabel»: interpolatie op roosters R&rsquo;Cel / R&rsquo;Cel+E&rsquo;Grid (meewerkende hoogte max. 300 mm); alleen GeoGrid: indicatieve schaling op R&rsquo;Cel-tabel.</div>
+                    <div class="param-uitleg">Bij «MIF-tabel»: 2D-interpolatie R&rsquo;Cel / R&rsquo;Cel+E&rsquo;Grid. Bron «Excel» = vaste werkboekwaarden per productlijn.</div>
+                </div>
+
+                <div class="form-group" id="romfix_laag2_velden" style="display: none;">
+                    <label for="mif_2">MIF — tweede wapeningsrij (Excel E20), alleen bij tweede Romfix-laag:</label>
+                    <input type="number" id="mif_2" class="input-klant" value="4.8" min="1" max="20" step="0.01" readonly>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="mif2_manual_override">
+                        <label for="mif2_manual_override" class="checkbox-label">MIF tweede rij handmatig</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -225,9 +242,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="werkingsdikte">Werkingsdikte E&rsquo;Grid + R&rsquo;Cel boven R&rsquo;Cel (mm):</label>
-                    <input type="number" id="werkingsdikte" value="150" min="150" max="150" step="1" readonly>
-                    <div class="param-uitleg">Maximaal <strong>150 mm</strong> (eerdere discussie noemde kort 200 mm; hier geldt <strong>150 mm</strong>). Dit is de dikte <strong>boven</strong> de geocel waarin geogrid + vulling in het model volledig gewapend meetellen — <strong>automatisch</strong>, geen klantinvoer.</div>
+                    <label for="werkingsdikte">Effectieve werkingsdikte eerste wapeningsrij (mm):</label>
+                    <input type="number" id="werkingsdikte" class="input-klant" value="150" min="1" max="400" step="1">
+                    <div class="param-uitleg">Zoals Excel <strong>geel</strong> bij de eerste wapeningsrij. Dit is de zone waarin geogrid + vulling in het model volledig als gewapend tellen (niet de celwand zelf). Standaard 150 mm; uw werkboek kan andere waarden tonen (bijv. 250 mm).</div>
+                </div>
+
+                <div class="form-group" id="werkingsdikte_2_group" style="display: none;">
+                    <label for="werkingsdikte_2">Effectieve werkingsdikte tweede wapeningsrij (mm):</label>
+                    <input type="number" id="werkingsdikte_2" class="input-klant" value="300" min="1" max="400" step="1">
+                    <div class="param-uitleg">Excel tweede gele rij onder «Invoer funderingswapening»; alleen actief als tweede Romfix-dikte &gt; 0.</div>
                 </div>
 
                 <div class="form-group">
@@ -252,15 +275,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="bovenlaag_dikte">Totale fundatie-opbouwdikte t/m rijbaan (mm, inclusief Romfix):</label>
+                    <label for="bovenlaag_dikte">Fundatie boven Romfix — dikte (mm), exclusief Romfix:</label>
                     <input type="number" id="bovenlaag_dikte" class="input-klant" value="1050" min="300" step="50">
-                    <div class="param-uitleg">Eén verticale maat: van de <strong>bovenkant van het rijvlak (asfalt)</strong> onder tot en met de onderzijde van de fundering die <strong>direct op Romfix</strong> rust, met de <strong>Romfix-laagdikte inbegrepen</strong> in dat totaal (zoals in de bespreking vastgehouden voor deze tool).</div>
+                    <div class="param-uitleg">Zoals Excel <strong>eerste hoofdrij</strong> boven de Romfix-regels (bijv. beton + fundering + series): verticale maat <strong>tot aan de bovenkant van de eerste Romfix-laag</strong>. Romfix zelf vult u hierboven apart in.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="bovenlaag_e">Stijfheid van dat pakket (asfalt t/m onderkant fundering boven Romfix) (MPa):</label>
+                    <label for="bovenlaag_e">Representatieve E-modulus van dat pakket (MPa):</label>
                     <input type="number" id="bovenlaag_e" class="input-klant" value="5000" min="2000" step="500">
-                    <div class="param-uitleg">Representatieve E-modulus voor <strong>hetzelfde totale pakket</strong> als het vorige veld (dus inclusief Romfix-lagen in die verticale maat) — bepaalt hoe de verkeersbelasting naar beneden wordt doorverweven in de Austroads-stap.</div>
+                    <div class="param-uitleg">Zelfde verticale maat als het vorige veld — bepaalt de Austroads-stap <strong>E<sub>max</sub></strong> naar de Romfix / ondergrond toe.</div>
                 </div>
 
                 <button type="button" onclick="berekenAdvies()">Resultaat berekenen</button>

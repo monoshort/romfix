@@ -74,8 +74,18 @@ const EXCEL_MIF_STANDAARD = {
     roadbase: 4.3
 };
 
+/** Excel «Invoer funderingswapening» tweede wapeningsrij (E20 / rij 20). */
+const EXCEL_MIF_RIJ2 = {
+    capping: 4.8,
+    roadbase: 3.8
+};
+
 function excelMifVoorProductlijn(seriesType) {
     return seriesType === 'roadbase' ? EXCEL_MIF_STANDAARD.roadbase : EXCEL_MIF_STANDAARD.capping;
+}
+
+function excelMifRij2(seriesType) {
+    return seriesType === 'roadbase' ? EXCEL_MIF_RIJ2.roadbase : EXCEL_MIF_RIJ2.capping;
 }
 
 /** Tweede rekentak W (MPa) bij modus «vast» + menggranulaat — ontwerppraktijk Chris t.o.v. Excel/Paul (33 MPa). */
@@ -201,6 +211,15 @@ function mifFromRomfixTables(wapeningConfig, eOnderbouw, eInfill) {
     return Math.round(Math.max(1.0, Math.min(20, base)) * 100) / 100;
 }
 
+/** Thenn de Barros: bijdrage Romfix-blok (T mm, werkingsdikte mm, E_ong, E_gewapend). */
+function thennRomfixBlok(T_mm, werk_mm, eOng, eGew) {
+    const hOngHoog = Math.max(0, T_mm - werk_mm);
+    const hGew = Math.min(werk_mm, T_mm);
+    const hOngLaag = T_mm - hOngHoog - hGew;
+    const cube = (h, e) => (h > 0 ? h * Math.pow(e, 1 / 3) : 0);
+    return cube(hOngHoog, eOng) + cube(hGew, eGew) + cube(hOngLaag, eOng);
+}
+
 function berekenAdvies() {
     try {
         // === INPUTS OPHALEN ===
@@ -221,9 +240,22 @@ function berekenAdvies() {
         const sifBase = sifBasisVoorConfig(wapening_config);
         let sif = sifBase;
         const sifInput = document.getElementById('sif');
-        const werkingsdikte = 150;
-        const werkingsInput = document.getElementById('werkingsdikte');
-        if (werkingsInput) werkingsInput.value = '150';
+        let werkingsdikte = parseFloat(document.getElementById('werkingsdikte')?.value);
+        if (!Number.isFinite(werkingsdikte)) werkingsdikte = 150;
+        werkingsdikte = Math.max(1, Math.min(400, werkingsdikte));
+
+        let romfix_dikte_2 = parseFloat(document.getElementById('romfix_dikte_2')?.value);
+        if (!Number.isFinite(romfix_dikte_2)) romfix_dikte_2 = 0;
+        romfix_dikte_2 = Math.max(0, romfix_dikte_2);
+
+        let werkingsdikte_2 = parseFloat(document.getElementById('werkingsdikte_2')?.value);
+        if (romfix_dikte_2 > 0) {
+            if (!Number.isFinite(werkingsdikte_2)) werkingsdikte_2 = 300;
+            werkingsdikte_2 = Math.max(1, Math.min(400, werkingsdikte_2));
+        } else {
+            werkingsdikte_2 = 0;
+        }
+
         let e_ongewapend_in = parseFloat(document.getElementById('e_ongewapend_in').value) || 150;
         let e_ongewapend_w = parseFloat(document.getElementById('e_ongewapend_w').value) || 33;
         const bovenlaag_dikte = parseFloat(document.getElementById('bovenlaag_dikte').value) || 1050;
@@ -276,6 +308,34 @@ function berekenAdvies() {
             }
         }
 
+        const mif2ManualEl = document.getElementById('mif2_manual_override');
+        const mif2Manual = !!(mif2ManualEl && mif2ManualEl.checked);
+        const mif2InputEl = document.getElementById('mif_2');
+        let mif2 = excelMifRij2(series_type);
+        if (romfix_dikte_2 > 0) {
+            if (mif2Manual) {
+                mif2 = parseFloat(mif2InputEl?.value) || excelMifRij2(series_type);
+                if (mif2InputEl) mif2InputEl.readOnly = false;
+            } else if (mifSource === 'excel') {
+                mif2 = excelMifRij2(series_type);
+                if (mif2InputEl) {
+                    mif2InputEl.value = mif2.toFixed(2);
+                    mif2InputEl.readOnly = true;
+                }
+            } else {
+                mif2 = mifFromRomfixTables(wapening_config, e_ondergrond, e_ongewapend_in);
+                if (mif2InputEl) {
+                    mif2InputEl.value = mif2.toFixed(2);
+                    mif2InputEl.readOnly = true;
+                }
+            }
+        } else if (mif2InputEl) {
+            mif2InputEl.readOnly = true;
+            if (!mif2Manual) {
+                mif2InputEl.value = excelMifRij2(series_type).toFixed(2);
+            }
+        }
+
         // === BASISWAARDEN ===
         const deklaag = 35;
         const onderlaag_theo_min = 25;
@@ -301,7 +361,7 @@ function berekenAdvies() {
         // Excel: E_max = E_bovenlaag * 2^(h/125), vervolgens sublagen opbouwen richting E_ondergrond,
         // met een cap op E_ongewapend (granulaire laag kan niet stijver worden dan zichzelf).
         const e_ongewapend = (e_ongewapend_in + e_ongewapend_w) / 2;
-        // Bovenlaag_dikte is hier de totale fundatie-opbouw inclusief Romfix.
+        // Bovenlaag_dikte: zoals Excel «Invoer wegconstructie» rij boven Romfix (exclusief Romfix-laaglagen).
         const e_max_raw = bovenlaag_e * Math.pow(2, bovenlaag_dikte / 125);
         const e_max = Math.min(e_max_raw, e_ongewapend);
         const ratio = Math.pow(e_max / e_ondergrond, 1 / 5);
@@ -313,29 +373,37 @@ function berekenAdvies() {
         }
         const e_niv = Math.round(subs.reduce((a, b) => a + b, 0) / 5);
 
-        // 2. Gewapend E
-        // Excel (sheet2): ROUND(MIN(SIF * E_niv, MIF * E_ongewapend_in),0)
+        // 2. Gewapend E (per Romfix-blok waar van toepassing)
+        // Excel: ROUND(MIN(SIF * E_niv, MIF * E_ongewapend_in),0)
         const e_gewapend = Math.round(Math.min(sif * e_niv, mif * e_ongewapend_in));
+        const e_gewapend_2 = romfix_dikte_2 > 0
+            ? Math.round(Math.min(sif * e_niv, mif2 * e_ongewapend_in))
+            : 0;
 
-        // 3. Laagopbouw splitsing
+        // 3. Laagopbouw splitsing (eerste blok — voor uitleg)
         const h_ong_hoog = Math.max(0, romfix_dikte - werkingsdikte);
         const h_gew = Math.min(werkingsdikte, romfix_dikte);
         const h_ong_laag = romfix_dikte - h_ong_hoog - h_gew;
         const e_ong = e_ongewapend;
 
-        // 4. Equivalente modulus (Thenn de Barros)
-        const sum_h = h_ong_hoog + h_gew + h_ong_laag;
-        let sum_trans = 0;
-        if (sum_h > 0) {
-            sum_trans = h_ong_hoog * Math.pow(e_ong, 1/3) + 
-                        h_gew * Math.pow(e_gewapend, 1/3) + 
-                        h_ong_laag * Math.pow(e_ong, 1/3);
+        const romfix_tot = romfix_dikte + romfix_dikte_2;
+        let h2_ong_hoog = 0;
+        let h2_gew = 0;
+        let h2_ong_laag = 0;
+        if (romfix_dikte_2 > 0) {
+            h2_ong_hoog = Math.max(0, romfix_dikte_2 - werkingsdikte_2);
+            h2_gew = Math.min(werkingsdikte_2, romfix_dikte_2);
+            h2_ong_laag = romfix_dikte_2 - h2_ong_hoog - h2_gew;
         }
-        const e_eq = sum_h > 0 ? Math.pow(sum_trans / sum_h, 3) : 0;
+
+        // 4. Equivalente modulus (Thenn de Barros) — één of twee Romfix-blokken onder elkaar (Excel-stapel)
+        let sum_trans = thennRomfixBlok(romfix_dikte, werkingsdikte, e_ong, e_gewapend);
+        if (romfix_dikte_2 > 0) sum_trans += thennRomfixBlok(romfix_dikte_2, werkingsdikte_2, e_ong, e_gewapend_2);
+        const e_eq = romfix_tot > 0 ? Math.pow(sum_trans / romfix_tot, 3) : 0;
         const e_eq_round = Math.round(e_eq);
 
         // 5. F2 (Palmer & Barber – vereenvoudigde tabel-interpolatie)
-        const hr = romfix_dikte / 150;
+        const hr = romfix_tot / 150;
         const e1e2 = e_eq / e_ondergrond || 1; // voorkom deling door 0
 
         const hr_values = [0.156, 0.312, 0.625, 1.25, 2.5, 5.0, 10.0];
@@ -389,10 +457,10 @@ function berekenAdvies() {
             ? "voldoet indicatief"
             : "onder doel, zwaardere opbouw nodig";
         const oia_onderlaag = Math.max(70, Math.round(25 + Math.max(0, (verkeersintensiteit - 10) / 10 * 5) + 45));
-        const oia_totale_dikte = 35 + oia_onderlaag + (romfix_nodig ? romfix_dikte : 0) + zand_dikte;
+        const oia_totale_dikte = 35 + oia_onderlaag + (romfix_nodig ? romfix_tot : 0) + zand_dikte;
 
         // Totale dikte
-        const totale_dikte = deklaag + onderlaag_praktijk + romfix_dikte + zand_dikte;
+        const totale_dikte = deklaag + onderlaag_praktijk + romfix_tot + zand_dikte;
 
         // === OUTPUT ===
         const resultEl = document.getElementById('result');
@@ -402,11 +470,20 @@ function berekenAdvies() {
         // Lagen vullen
         const lagenList = document.getElementById('lagen');
         lagenList.innerHTML = '';
+        const romfixLijn = romfix_dikte_2 > 0
+            ? [
+                `Romfix-laag 1 (onder bindlaag): ${romfix_dikte} mm — ${romfix_omschrijving}; MIF ${mif.toFixed(2)}`,
+                `Romfix-laag 2 (onder laag 1): ${romfix_dikte_2} mm — ${romfix_omschrijving}; MIF ${mif2.toFixed(2)}`
+            ]
+            : [`Romfix-fundering: ${romfix_dikte} mm — ${romfix_omschrijving}`];
+        const wapeningZin = romfix_dikte_2 > 0
+            ? `Wapening: SIF ${sif}; MIF laag 1 = ${mif.toFixed(2)}, laag 2 = ${mif2.toFixed(2)}`
+            : `Wapening in rekening: ja (draagsteun SIF ${sif}, stijfheid MIF ${mif.toFixed(2)})`;
         const lagenArray = [
             `Slijt- / deklaag: ${deklaag} mm (AC 11 surf DL-B)`,
             `Bind- / onderlaag asfalt: ${onderlaag_praktijk} mm (AC 22 base OL-B; theoretisch minimum ca. ${Math.round(onderlaag_theo)} mm)`,
-            `Romfix-fundering: ${romfix_dikte} mm — ${romfix_omschrijving}`,
-            `Wapening in rekening: ja (draagsteun SIF ${sif}, stijfheid MIF ${mif.toFixed(2)})`,
+            ...romfixLijn,
+            wapeningZin,
             `Zandbed / tussenlaag: ${zand_dikte} mm`,
             `Ondergrond — rekenwaarde stijfheid (E-modulus): ${e_ondergrond} MPa`
         ];
@@ -421,8 +498,9 @@ function berekenAdvies() {
 
         const workflowBlok = `
             <div class="calculation-step workflow-note">
+                <strong>Kern</strong> = zelfde rekenketen als het Romfix Excel-werkboek (Austroads → SIF/MIF → Thenn de Barros → Palmer &amp; Barber). <strong>Aanvullingen</strong> = o.a. OIA-indicatie, MIF-tabellen bodem/vulling, indicatieve SIF-trend — optioneel naast die kern.<br>
                 <strong>Workflow (indicatief)</strong><br>
-                Eerst elementenverharding en verkeersbelasting bepalen, daarna fundering/Romfix. Romfix en OIA in deze tool delen dezelfde invoer waar dat zinvol is; wijzigingen in het pakket boven Romfix (E-modulus, dikte) werken door in de Austroads-stappen. <em>Vuistregel</em> (niet normatief): een substantiële stijging van de stijfheid van elementen boven Romfix (bijv. E 20→40 MPa) kan in de orde van <strong>ca. 200 mm</strong> extra totale pakketdikte vergen — altijd projectmatig toetsen.
+                Eerst elementenverharding en verkeersbelasting bepalen, daarna fundering/Romfix. Romfix en OIA in deze tool delen dezelfde invoer waar dat zinvol is; het pakket <em>boven</em> de Romfix-laaglagen (dikte + E) voert u in zoals Excel rij boven Romfix; dat werkt door in de Austroads-stap. <em>Vuistregel</em> (niet normatief): een substantiële stijging van de stijfheid van elementen boven Romfix (bijv. E 20→40 MPa) kan in de orde van <strong>ca. 200 mm</strong> extra totale pakketdikte vergen — altijd projectmatig toetsen.
             </div>`;
         const doelBlok =
             bereken_doel === 'asfalt_dikte'
@@ -448,7 +526,7 @@ function berekenAdvies() {
                     ${doelBlok}
                     <div class="calculation-step">
                         <strong>Vergelijking rekenmethodes</strong><br>
-                        Romfix: levensduur ${geschatte_levensduur} jaar, totale opbouw ${totale_dikte} mm<br>
+                        Romfix: levensduur ${geschatte_levensduur} jaar, totale opbouw ${totale_dikte} mm (Romfix totaal ${romfix_tot} mm)<br>
                         OIA-indicatie: levensduur ${oia_levensduur} jaar, totale opbouw ${oia_totale_dikte} mm<br>
                         Zelfde invoerparameters gelden voor beide blokken waar ondersteund. Let op: OIA in deze tool is vereenvoudigd; officiële OIA vereist specialistische invoer.
                     </div>
@@ -472,26 +550,37 @@ function berekenAdvies() {
                 Tussenlagen (van diep naar ondiep): ${subs[4]}, ${subs[3]}, ${subs[2]}, ${subs[1]}, ${subs[0]} MPa<br>
                 Gemiddelde stijfheid daarvan (E<sub>niv</sub>): ${e_niv} MPa</div>
 
-            <div class="calculation-step"><strong>2. Stijfheid van het gewapende Romfix-deel</strong><br>
+            <div class="calculation-step"><strong>2. Stijfheid van het gewapende Romfix-deel</strong> (per laag zoals Excel)<br>
                 De rekenregel neemt het gunstigste van twee opties: SIF × gemiddelde sublaag of MIF × stijfheid granulaat (hoofdwaarde — zoals in het Excel-model).<br>
                 ${mifManual ? '' : mifSource === 'excel'
-                    ? `MIF = ${mif.toFixed(2)} (Excel-basis: E19, tabblad ${series_type === 'roadbase' ? 'RoadBase' : 'Capping'}_Romfix).<br>`
-                    : `MIF = ${mif.toFixed(2)} (aanvullende Romfix MIF-tabel; onderbouw ${e_ondergrond} MPa, invulling ${e_ongewapend_in} MPa).<br>`}
-                E<sub>gewapend</sub> = min(${sif} × ${e_niv}, ${mif.toFixed(2)} × ${e_ongewapend_in}) = ${Math.round(e_gewapend)} MPa${sifMode === 'indicatief_bodem'
+                    ? `MIF laag 1 = ${mif.toFixed(2)} (Excel eerste wapeningsrij; tabblad ${series_type === 'roadbase' ? 'RoadBase' : 'Capping'}_Romfix).<br>`
+                    : `MIF laag 1 = ${mif.toFixed(2)} (aanvullende Romfix MIF-tabel; onderbouw ${e_ondergrond} MPa, invulling ${e_ongewapend_in} MPa).<br>`}
+                E<sub>gewapend,1</sub> = min(${sif} × ${e_niv}, ${mif.toFixed(2)} × ${e_ongewapend_in}) = ${Math.round(e_gewapend)} MPa${romfix_dikte_2 > 0
+                    ? `<br>${mif2Manual ? '' : mifSource === 'excel'
+                        ? `MIF laag 2 = ${mif2.toFixed(2)} (Excel tweede wapeningsrij / E20).<br>`
+                        : `MIF laag 2 = ${mif2.toFixed(2)} (zelfde bron als laag 1).<br>`}
+                E<sub>gewapend,2</sub> = min(${sif} × ${e_niv}, ${mif2.toFixed(2)} × ${e_ongewapend_in}) = ${Math.round(e_gewapend_2)} MPa`
+                    : ''}${sifMode === 'indicatief_bodem'
                     ? `<br>SIF = ${sif.toFixed(1)} (basis ${sifBase.toFixed(1)} × bodemfactor ${sifFactorFromBodem(e_ondergrond).toFixed(3)} — indicatief; niet 1-op-1 gelijk aan een vaste Excel-cel).`
                     : ''}</div>
 
             <div class="calculation-step"><strong>3. Verdeling over de Romfix-dikte</strong><br>
-                Ongewapend (boven E&rsquo;Grid / R&rsquo;Cel): ${h_ong_hoog} mm — E = ${e_ong} MPa<br>
-                Gewapend Romfix (E&rsquo;Grid + R&rsquo;Cel): ${h_gew} mm — E = ${e_gewapend} MPa<br>
-                Ongewapend (onder E&rsquo;Grid / R&rsquo;Cel): ${h_ong_laag} mm — E = ${e_ong} MPa</div>
+                <strong>Laag 1 (${romfix_dikte} mm)</strong>, werkingsdikte ${werkingsdikte} mm:<br>
+                Ongewapend (boven): ${h_ong_hoog} mm — E = ${e_ong} MPa<br>
+                Gewapend: ${h_gew} mm — E = ${e_gewapend} MPa<br>
+                Ongewapend (onder): ${h_ong_laag} mm — E = ${e_ong} MPa${romfix_dikte_2 > 0
+                    ? `<br><strong>Laag 2 (${romfix_dikte_2} mm)</strong>, werkingsdikte ${werkingsdikte_2} mm:<br>
+                Ongewapend (boven): ${h2_ong_hoog} mm — E = ${e_ong} MPa<br>
+                Gewapend: ${h2_gew} mm — E = ${e_gewapend_2} MPa<br>
+                Ongewapend (onder): ${h2_ong_laag} mm — E = ${e_ong} MPa`
+                    : ''}</div>
 
-            <div class="calculation-step"><strong>4. Gemiddelde stijfheid van het hele Romfix-pakket</strong> (Thenn de Barros)<br>
+            <div class="calculation-step"><strong>4. Gemiddelde stijfheid van het hele Romfix-pakket</strong> (Thenn de Barros, totaal ${romfix_tot} mm)<br>
                 Tussenstap (gewogen volgens de formule): ${sum_trans.toFixed(2)}<br>
                 E<sub>eq</sub> = ${e_eq_round} MPa</div>
 
             <div class="calculation-step"><strong>5. Correctie voor de zachtere ondergrond eronder</strong> (Palmer &amp; Barber)<br>
-                Verhouding dikte (${(romfix_dikte / 150).toFixed(2)}) en stijfheid Romfix t.o.v. ondergrond (${(e_eq / e_ondergrond).toFixed(2)})<br>
+                Verhouding dikte (${(romfix_tot / 150).toFixed(2)}) en stijfheid Romfix t.o.v. ondergrond (${(e_eq / e_ondergrond).toFixed(2)})<br>
                 Factor F2 = ${f2_round}</div>
 
             <div class="calculation-step"><strong>6. Stijfheid na correctie</strong> (meegenomen effect van de ondergrond)<br>
@@ -523,8 +612,9 @@ function berekenAdvies() {
                 ? `SIF = ${sif.toFixed(1)} (basis ${sifBase.toFixed(1)} voor ${wapening_config === 'grid_only' ? 'alleen GeoGrid' : wapening_config === 'cell_only' ? 'alleen GeoCell' : 'GeoGrid + GeoCell'}, met indicatieve ondergrondcorrectie: zachtere bodem iets hoger, stijvere iets lager).`
                 : `SIF staat op de vaste Chris/Excel-waarde ${sif.toFixed(1)} (${wapening_config === 'grid_only' ? 'alleen GeoGrid' : wapening_config === 'cell_only' ? 'alleen GeoCell' : 'GeoGrid + GeoCell'}). Kies «indicatieve bodemcorrectie» bij SIF voor een ruwe trendlijn — strikt Excel-gedrag blijft bij «vast».`,
             mifBronZin,
-            `Werkingsdikte E’Grid + R’Cel boven R’Cel is in deze versie gefixeerd op 150 mm (volledig gewapend).`,
-            `Deze stappen sluiten aan op het Romfix Excel-rekenmodel (Austroads, Thenn de Barros, Palmer & Barber); MIF-bron «Excel» gebruikt de daarin opgenomen standaard-MIF per productlijn.`,
+            `Werkingsdikte per wapeningsrij — invoer zoals Excel (geel); max. in tool 400 mm voor robuustheid.`,
+            `MIF-bron «Excel»: eerste rij = standaard E19, tweede Romfix-laag = E20 (Capping 4,8 / RoadBase 3,8).`,
+            `Deze stappen sluiten aan op het Romfix Excel-rekenmodel (Austroads, Thenn de Barros, Palmer & Barber); aanvullingen (OIA, MIF-tabel 2D, SIF-bodemtrend) zijn optioneel.`,
             rekenmethode !== 'romfix' ? `OIA-uitkomst in deze tool is een vereenvoudigde indicatie en geen officiële OIA-dimensionering.` : `Voor OIA-vergelijking kun je bovenin rekenmethode op OIA of beide zetten.`,
             breedte < 2.75 ? `Smalle rijbaan: vaak extra maatregelen aan de zijkant (bijvoorbeeld beschoeiing) bespreken.` : `Rijbaanbreedte: in beginsel geen bijzonder kanttekening voor stabiliteit in deze scan.`,
             `Alle cijfers zijn indicatief; definitieve waarden volgen uit het officiële Romfix-dossier of projectberekening.`,
@@ -572,7 +662,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const eOngewapendWMode = document.getElementById('e_ongewapend_w_mode');
     const seriesType = document.getElementById('series_type');
     const funderingsAggregaat = document.getElementById('funderingsaggregaat');
-    const werkingsdikte = document.getElementById('werkingsdikte');
+    const romfixDikte2El = document.getElementById('romfix_dikte_2');
+    const mif2El = document.getElementById('mif_2');
+    const mif2ManualOverride = document.getElementById('mif2_manual_override');
+
+    function toggleRomfixLaag2Velden() {
+        const v = parseFloat(romfixDikte2El?.value) || 0;
+        const on = v > 0;
+        const b1 = document.getElementById('romfix_laag2_velden');
+        const b2 = document.getElementById('werkingsdikte_2_group');
+        if (b1) b1.style.display = on ? 'block' : 'none';
+        if (b2) b2.style.display = on ? 'block' : 'none';
+    }
+
+    function syncMif2UitTabel() {
+        if (!mif2El || !wapeningConfig || !eOndergrond || !eOngewapendIn) return;
+        const rom2 = parseFloat(romfixDikte2El?.value) || 0;
+        if (rom2 <= 0) {
+            mif2El.readOnly = true;
+            const st = seriesType?.value || 'capping';
+            mif2El.value = excelMifRij2(st).toFixed(2);
+            return;
+        }
+        if (mif2ManualOverride && mif2ManualOverride.checked) {
+            mif2El.readOnly = false;
+            return;
+        }
+        const src = document.getElementById('mif_source')?.value || 'excel';
+        if (src === 'excel') {
+            const st = seriesType?.value || 'capping';
+            mif2El.value = excelMifRij2(st).toFixed(2);
+            mif2El.readOnly = true;
+            return;
+        }
+        const eSub = parseFloat(eOndergrond.value);
+        const eIn = parseFloat(eOngewapendIn.value);
+        const v = mifFromRomfixTables(
+            wapeningConfig.value,
+            Number.isFinite(eSub) ? eSub : 40,
+            Number.isFinite(eIn) ? eIn : 150
+        );
+        mif2El.value = v.toFixed(2);
+        mif2El.readOnly = true;
+    }
 
     function updateSifDisplay() {
         if (!wapeningConfig || !sif || !eOndergrond) return;
@@ -604,9 +736,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function syncMifUitTabel() {
-        if (!mif || !wapeningConfig || !eOndergrond || !eOngewapendIn) return;
+        if (!mif || !wapeningConfig || !eOndergrond || !eOngewapendIn) {
+            syncMif2UitTabel();
+            return;
+        }
         if (mifManualOverride && mifManualOverride.checked) {
             mif.readOnly = false;
+            syncMif2UitTabel();
             return;
         }
         const src = document.getElementById('mif_source')?.value || 'excel';
@@ -614,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const st = seriesType?.value || 'capping';
             mif.value = excelMifVoorProductlijn(st).toFixed(2);
             mif.readOnly = true;
+            syncMif2UitTabel();
             return;
         }
         const eSub = parseFloat(eOndergrond.value);
@@ -625,6 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         mif.value = v.toFixed(2);
         mif.readOnly = true;
+        syncMif2UitTabel();
     }
 
     function applySeriesDefaults() {
@@ -717,14 +855,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    if (mif2ManualOverride) {
+        mif2ManualOverride.addEventListener('change', () => {
+            if (mif2ManualOverride.checked) {
+                if (mif2El) mif2El.readOnly = false;
+            } else {
+                syncMif2UitTabel();
+            }
+        });
+    }
     const mifSourceSel = document.getElementById('mif_source');
     if (mifSourceSel) mifSourceSel.addEventListener('change', syncMifUitTabel);
 
-    if (werkingsdikte) {
-        werkingsdikte.value = '150';
-        werkingsdikte.readOnly = true;
+    if (romfixDikte2El) {
+        romfixDikte2El.addEventListener('input', () => {
+            toggleRomfixLaag2Velden();
+            syncMif2UitTabel();
+        });
+        romfixDikte2El.addEventListener('change', () => {
+            toggleRomfixLaag2Velden();
+            syncMif2UitTabel();
+        });
     }
+
     updateSifDisplay();
     applyWModeRules();
+    toggleRomfixLaag2Velden();
     syncMifUitTabel();
 });

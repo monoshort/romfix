@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romfix — Excel-werkboek (exacte rekenketen)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        .excel-werkboek-note { background: var(--uitleg-bg, rgba(0,0,0,.04)); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .excel-table-wrap { overflow-x: auto; margin: 1rem 0; }
+        table.excel-result { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table.excel-result th, table.excel-result td { border: 1px solid rgba(0,0,0,.12); padding: 0.45rem 0.65rem; text-align: left; }
+        table.excel-result th { background: rgba(0,0,0,.06); font-weight: 600; }
+        table.excel-result td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        table.excel-result td.explain { font-size: 0.88rem; line-height: 1.45; max-width: 32rem; }
+        table.excel-result .cell-ref { color: var(--muted, #555); font-size: 0.82rem; }
+        h3.excel-h3 { margin-top: 2rem; font-size: 1.05rem; }
+        p.excel-block-uitleg { font-size: 0.92rem; line-height: 1.5; margin: 0.35rem 0 0.75rem; color: var(--muted, #444); max-width: 52rem; }
+        .excel-deel { margin: 2.5rem 0; padding: 1.25rem 1.35rem 1.5rem; border: 1px solid rgba(0,0,0,.1); border-radius: 10px; background: rgba(255,255,255,.6); }
+        .excel-deel-title { margin: 0 0 1rem; font-size: 1.15rem; display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+        .excel-deel-nr { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; height: 1.75rem; border-radius: 6px; background: rgba(0,0,0,.08); font-weight: 700; font-size: 0.95rem; }
+        .excel-deel-q { margin: 0.65rem 0 0.25rem; font-size: 0.9rem; font-weight: 600; color: #222; }
+        .excel-deel-a { margin: 0 0 0.85rem; font-size: 0.92rem; line-height: 1.55; color: #444; max-width: 50rem; }
+        .excel-deel-a:last-child { margin-bottom: 0; }
+        .excel-toc { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.88rem; }
+        .excel-toc a { text-decoration: underline; text-underline-offset: 2px; }
+        #excelResult .excel-deel:first-of-type { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-flex">
+            <div class="logo-section">
+                <a class="brand" href="index.html" aria-label="Romfix">
+                    <img class="brand-logo" src="assets/romfix-logo.webp" alt="Romfix logo">
+                </a>
+                <p class="tagline">Duurzame funderings- en verhardingsoplossingen</p>
+            </div>
+            <nav class="nav" aria-label="Hoofdnavigatie">
+                <button class="nav-toggle" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button>
+                <ul id="primaryNav" class="nav-links">
+                    <li><a href="index.html#config">Indicatieve tool</a></li>
+                    <li><a href="excel-werkboek.html">Excel-werkboek</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="contact-info">
+                <p><strong>Romfix B.V.</strong><br>
+                <a href="https://www.romfix.nl">www.romfix.nl</a><br>
+                info@romfix.nl</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-bottom: 3rem;">
+        <h1>Excel-werkboek — exacte rekenketen</h1>
+        <p class="document-lead">Deze pagina gebruikt de <strong>zelfde cellogica</strong> als het Romfix-spreadsheet <strong>«sterkteberekingen funderingswapening»</strong> (tabbladen Capping_Romfix / RoadBase_Romfix, versie 2.3), inclusief Austroads-meervoudige kolommen, Thenn de Barros en Palmer&nbsp;&amp;&nbsp;Barber per blok. Geen OIA- of MIF-tabelaanvullingen — alleen het werkboek.</p>
+
+        <div class="excel-werkboek-note">
+            <strong>Gebruik</strong> Vul de gele velden zoals in Excel «Invoer wegconstructie» en «Invoer funderingswapening». <strong>C19</strong> en <strong>C20</strong> worden als <code>B12+B13</code> en <code>B12+B13+B14</code> berekend. De rekentool op de hoofdpagina blijft een <strong>vereenvoudigde indicatie</strong>; gebruik <strong>deze pagina</strong> om 1-op-1 met het werkboek te vergelijken.
+        </div>
+
+        <section class="excel-deel" id="deel-invoer">
+            <h2 class="excel-deel-title"><span class="excel-deel-nr">0</span> Invoer — wat het werkboek nodig heeft</h2>
+            <p class="excel-deel-q">Wat vult u hier in?</p>
+            <p class="excel-deel-a">De diktes en E-moduli van elke fysieke laag (asfalt/beton, Romfix-pakketten, ondergrond) plus per wapeningsrij de werkingsdikte, SIF en MIF. Dat zijn dezelfde <strong>gele cellen</strong> als in het spreadsheet.</p>
+            <p class="excel-deel-q">Waarom?</p>
+            <p class="excel-deel-a">Alle vervolgstappen zijn <strong>puur afgeleid</strong>: het werkboek deelt elke Romfix-laag op in «ongewapend boven de wapening», «gewapend» en «ongewapend eronder», rekent sublagen (Austroads), combineert zones (Thenn) en past randcorrecties toe (Palmer&nbsp;&amp;&nbsp;Barber). Zonder deze invoer zijn die stappen niet te definiëren.</p>
+            <p class="excel-deel-q">In Excel</p>
+            <p class="excel-deel-a">Blokken «Invoer wegconstructie» (rij 12–15) en «Invoer funderingswapening» (rij 19–20) op het gekozen tabblad.</p>
+        </section>
+
+        <form id="excelForm">
+            <h2 class="excel-h3">Invoervelden (zelfde cellen als Excel)</h2>
+            <div class="form-group">
+                <label for="sheet">Werkboek-tabblad</label>
+                <select id="sheet" class="input-klant">
+                    <option value="capping" selected>Capping_Romfix</option>
+                    <option value="roadbase">RoadBase_Romfix</option>
+                </select>
+            </div>
+
+            <h2 class="excel-h3">Invoer wegconstructie (rij 12–15)</h2>
+            <div class="form-group">
+                <label for="B12">Rij 12 — Laagdikte beton/fundering/series (B12, mm)</label>
+                <input type="number" id="B12" class="input-klant" value="1050" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="C12">Rij 12 — E ongewapend In (C12, MPa)</label>
+                <input type="number" id="C12" class="input-klant" value="5000" min="0" step="100">
+                <div class="param-uitleg">Alleen ter archief; de kernformules op dit tabblad gebruiken vooral B12 en de Romfix-rijen.</div>
+            </div>
+
+            <p><strong>Rij 13</strong> — eerste Romfix-laag</p>
+            <div class="form-group">
+                <label for="B13">B13 Laagdikte (mm)</label>
+                <input type="number" id="B13" class="input-klant" value="250" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="C13">C13 E In (MPa)</label>
+                <input type="number" id="C13" class="input-klant" value="150" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="D13">D13 E W (MPa)</label>
+                <input type="number" id="D13" class="input-klant" value="49" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="F13">F13 vast / vrij</label>
+                <select id="F13" class="input-klant">
+                    <option value="vrij" selected>vrij</option>
+                    <option value="vast">vast</option>
+                </select>
+            </div>
+
+            <p><strong>Rij 14</strong> — tweede Romfix-laag</p>
+            <div class="form-group">
+                <label for="B14">B14 Laagdikte (mm)</label>
+                <input type="number" id="B14" class="input-klant" value="300" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="C14">C14 E In (MPa)</label>
+                <input type="number" id="C14" class="input-klant" value="150" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="D14">D14 E W (MPa)</label>
+                <input type="number" id="D14" class="input-klant" value="33" min="0" step="1">
+            </div>
+
+            <p><strong>Rij 15</strong> — ondergrond</p>
+            <div class="form-group">
+                <label for="C15">C15 E In ondergrond (MPa)</label>
+                <input type="number" id="C15" class="input-klant" value="11" min="1" step="1">
+            </div>
+
+            <h2 class="excel-h3">Invoer funderingswapening (rij 19–20)</h2>
+            <p><strong>Rij 19</strong></p>
+            <div class="form-group">
+                <label for="B19">B19 Effectieve werkingsdikte (mm)</label>
+                <input type="number" id="B19" class="input-klant" value="250" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="D19">D19 SIF (-)</label>
+                <input type="number" id="D19" class="input-klant" value="10" min="1" step="0.1">
+            </div>
+            <div class="form-group">
+                <label for="E19">E19 MIF (-) — leeg = standaard werkboek</label>
+                <input type="number" id="E19" class="input-klant" value="" min="0" step="0.1" placeholder="Capping 4,5 / RoadBase 4,3">
+            </div>
+
+            <p><strong>Rij 20</strong></p>
+            <div class="form-group">
+                <label for="B20">B20 Effectieve werkingsdikte (mm)</label>
+                <input type="number" id="B20" class="input-klant" value="300" min="0" step="10">
+            </div>
+            <div class="form-group">
+                <label for="D20">D20 SIF (-)</label>
+                <input type="number" id="D20" class="input-klant" value="10" min="1" step="0.1">
+            </div>
+            <div class="form-group">
+                <label for="E20">E20 MIF (-) — leeg = standaard werkboek</label>
+                <input type="number" id="E20" class="input-klant" value="" min="0" step="0.1" placeholder="Capping 4,8 / RoadBase 3,8">
+            </div>
+
+            <button type="button" id="btnBereken">Bereken (werkboek)</button>
+        </form>
+
+        <section id="excelResult" style="display: none;">
+            <h2 class="excel-h3" style="margin-top: 2rem;">Resultaat — per rekenonderdeel</h2>
+            <p class="excel-block-uitleg" style="margin-top: 0;">Klik om naar een onderdeel te springen. Elke sectie legt uit <strong>wat</strong> er wordt berekend en <strong>waarom</strong> dat nodig is in de keten.</p>
+            <nav aria-label="Spronglijst rekenonderdelen">
+                <ul class="excel-toc">
+                    <li><a href="#deel-overzicht">1. Overzicht keten</a></li>
+                    <li><a href="#deel-splitsing">2. Laagsplitsing</a></li>
+                    <li><a href="#deel-gewapend">3. Gewapende stijfheid (SIF/MIF)</a></li>
+                    <li><a href="#deel-austroads">4. Austroads-sublagen</a></li>
+                    <li><a href="#deel-thenn">5. Thenn de Barros</a></li>
+                    <li><a href="#deel-palmer">6. Palmer &amp; Barber</a></li>
+                    <li><a href="#deel-iteratie">7. Iteratie</a></li>
+                </ul>
+            </nav>
+
+            <section class="excel-deel" id="deel-overzicht">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">1</span> Overzicht van de rekenketen</h2>
+                <p class="excel-deel-q">Wat gebeurt er in het groot?</p>
+                <p class="excel-deel-a">Het werkboek zet uw lagen om naar een <strong>rij stapjes</strong>: eerst worden Romfix-diktes opgesplitst in zones rond de wapening, dan worden «gemiddelde sublagen» (Austroads) bepaald, daarna de <strong>gewapende</strong> modulus met SIF en MIF, vervolgens worden zones samengevoegd tot één equivalente E per blok (Thenn), en tenslotte worden <strong>randcorrecties</strong> (Palmer&nbsp;&amp;&nbsp;Barber) toegepast. Die laatste stap koppelt weer terug naar de D-kolom in het resultaat — daarom gebruikt Excel <strong>iteratie</strong>.</p>
+                <p class="excel-deel-q">Waarom deze volgorde?</p>
+                <p class="excel-deel-a">Zachte ondergrond en gewapend granulaat beïnvloeden elkaar: u kunt de stijfheid van een zone niet eerst definitief vastleggen zonder te weten hoe het pakket erboven en eronder reageert. Het werkboek lost dat op door de keten meerdere keren door te rekenen tot de cijfers stabiel zijn.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Van «Resultaat laagopbouw» door naar Austroads, Thenn en Palmer op hetzelfde tabblad; kringverwijzingen staan aan (iteratieve berekening).</p>
+            </section>
+
+            <section class="excel-deel" id="deel-splitsing">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">2</span> Laagsplitsing en stijfheid per zone</h2>
+                <p class="excel-deel-q">Wat berekenen we?</p>
+                <p class="excel-deel-a">Uit de <strong>totaaldiktes</strong> en de <strong>werkingsdiktes</strong> (B19, B20) worden de hoogtes <strong>B25–B30</strong> afgeleid: per Romfix-pakket een stuk <em>ongewapend boven</em> de wapening, het <em>gewapende</em> stuk, en <em>ongewapend onder</em> de wapening. Daarbij horen moduli in kolom <strong>C</strong> en een <strong>D</strong>-waarde die straks met Palmer-factoren wordt aangepast. Kolom <strong>E</strong> toont waar nodig het Thenn-resultaat (bijv. <strong>E25 = D51</strong>).</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Wapening versterkt alleen het deel waar grid en vulling «mee werken»; de rest gedraagt zich als gewone granulaat. Zonder deze opsplitsing zou één gemiddelde E het echte gedrag van het Romfix-systeem schetsen.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Tabel «Resultaat laagopbouw en stijfheid», rijen 24–31 (kolommen B–E).</p>
+                <div class="excel-table-wrap">
+                    <table class="excel-result" id="tblLagen">
+                        <thead><tr><th>Zone / uitleg</th><th class="num">h (mm)</th><th class="num">E (MPa)</th><th class="num">D-kolom</th><th class="num">E_eq-kolom</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="excel-deel" id="deel-gewapend">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">3</span> Gewapende stijfheid — SIF en MIF</h2>
+                <p class="excel-deel-q">Wat berekenen we?</p>
+                <p class="excel-deel-a">Voor elk gewapend blok (rij 13 en 14) berekent het werkboek <strong>min(SIF × «Eₙᵢᵥ-achtige waarde», MIF × E In van het granulaat)</strong>. De SIF-hoek gebruikt de D-waarde van de <strong>ongewapende laag onder</strong> hetzelfde pakket (D27 voor het eerste pakket, C31 oftewel ondergrond voor het tweede in de tweede rij-formule). Het resultaat staat in <strong>C26</strong> en <strong>C29</strong>.</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Twee mechanismen begrenzen de versterking: de <strong>omliggende stevigheid</strong> (SIF × sublaaginvloed) en het <strong>infill-materiaal</strong> (MIF × In). Het werkboek neemt het gunstigste van beide begrenzingen — het systeem mag niet optimistischer zijn dan beide fysische limieten toestaan.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Cellen <strong>C26</strong> en <strong>C29</strong> (koppel aan D19, E19, D20, E20 en de D-kolommen eronder).</p>
+                <div class="excel-table-wrap">
+                    <table class="excel-result" id="tblGewapend">
+                        <thead><tr><th>Onderdeel</th><th class="num">Waarde (MPa)</th><th>Excel</th></tr></thead>
+                        <tbody>
+                            <tr><td>Gewapende modulus eerste Romfix-pakket</td><td class="num" id="outC26"></td><td><span class="cell-ref">C26</span></td></tr>
+                            <tr><td>Gewapende modulus tweede Romfix-pakket</td><td class="num" id="outC29"></td><td><span class="cell-ref">C29</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="excel-deel" id="deel-austroads">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">4</span> Austroads — vijf sublagen per «tak»</h2>
+                <p class="excel-deel-q">Wat berekenen we?</p>
+                <p class="excel-deel-a">In <strong>zes kolommen (B–G)</strong> wordt vanaf een gekozen onderliggende stijfheid vijf keer omhoog «opgebouwd» met de formule <em>E → min(ratio × vorige, cap)</em>, waarbij de stap uit de dikte van die tak en 2^(dikte/125) volgt (AGPT02/10). Het <strong>gemiddelde</strong> van die vijf waarden (rij <strong>46</strong>) is de representatieve sublaagstijfheid voor die tak.</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Verkeersbelasting werkt door een korrelige fundering in <strong>stappen</strong>: de modulus «bouwt» van de ondergrond naar het stijvere pakket toe. Meerdere kolommen zijn nodig omdat elke <strong>fysieke route</strong> (eerste Romfix-laag, tweede laag, stuk onder wapening, enz.) een eigen dikte en eigen start-E heeft.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Blok «Bepaling stijfheidsmodulus per sublaag», rij 36–46. <strong>B</strong> = route via B30; <strong>C</strong> via B28 + D29; <strong>D</strong> via B27 + D28; <strong>E</strong> via B25 + D26; <strong>F</strong> via B14 + C15; <strong>G</strong> via B13 + G37 (G37 = C15/F67).</p>
+                <div class="excel-table-wrap">
+                    <table class="excel-result" id="tblSub">
+                        <thead><tr><th>Uitkomst</th><th class="num">B</th><th class="num">C</th><th class="num">D</th><th class="num">E</th><th class="num">F</th><th class="num">G</th></tr></thead>
+                        <tbody><tr><td class="explain">Gemiddelde sub1–sub5 <span class="cell-ref">(B46 … G46)</span></td><td class="num" id="b46"></td><td class="num" id="c46"></td><td class="num" id="d46"></td><td class="num" id="e46"></td><td class="num" id="f46"></td><td class="num" id="g46"></td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="excel-deel" id="deel-thenn">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">5</span> Thenn de Barros — equivalente laagstijfheid</h2>
+                <p class="excel-deel-q">Wat berekenen we?</p>
+                <p class="excel-deel-a">Uit drie opeenvolgende zones (ongewapend–gewapend–ongewapend) met elk een dikte <strong>h</strong> en modulus <strong>E</strong> wordt één <strong>equivalente E</strong> berekend (methode Thenn de Barros, TU Delft-notitie). Dat getal staat in kolom <strong>D</strong> (D51, D52, … D56) en beschrijft het Romfix-blok als één stijfheid voor de volgende stap.</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Palmer&nbsp;&amp;&nbsp;Barber heeft een <strong>verhouding</strong> nodig tussen een laag en de laag eronder. In plaats van drie keer apart te corrigeren, vormt Thenn eerst één «lumped» stijfheid per deelgebied.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Blok «Bepaling equivalente stijfheidsmodulus», rij 50–56.</p>
+                <div class="excel-table-wrap">
+                    <table class="excel-result" id="tblThenn">
+                        <thead><tr><th>Rij / uitleg</th><th class="num">h (mm)</th><th class="num">E (MPa)</th><th class="num">E_eq (D)</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="excel-deel" id="deel-palmer">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">6</span> Palmer &amp; Barber — factor F₂</h2>
+                <p class="excel-deel-q">Wat berekenen we?</p>
+                <p class="excel-deel-a">Per zone wordt een factor <strong>F</strong> afgeleid uit het tweelagenmodel (halfoneindig medium): verhouding <strong>dikte / referentie</strong> en <strong>E_boven / E_onder</strong>. In het werkboek staat een vaste referentie <strong>a = 150 mm</strong> (cel B61 e.d.). De uitkomst deelt de onderliggende D-stappen (bijv. D28/F61) en stuurt zo de <strong>D25–D30</strong>-keten aan.</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Een stijve laag op een zachte ondergrond heeft niet hetzelfde effect als op papier: de ondergrond «buigt mee». F₂ reduceert of schaalt het <strong>effectieve</strong> gedrag zodat de getoonde D- en E-waarden beter aansluiten op dat randeffect.</p>
+                <p class="excel-deel-q">In Excel</p>
+                <p class="excel-deel-a">Blok «Bepaling conversiefactor F2», rij 58–67 (<strong>F61–F67</strong>).</p>
+                <div class="excel-table-wrap">
+                    <table class="excel-result" id="tblF2">
+                        <thead><tr><th>Zone / uitleg</th><th class="num">Factor F</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="excel-deel" id="deel-iteratie">
+                <h2 class="excel-deel-title"><span class="excel-deel-nr">7</span> Iteratie en kringverwijzingen</h2>
+                <p class="excel-deel-q">Wat gebeurt er hier?</p>
+                <p class="excel-deel-a">Cellen zoals <strong>D25–D30</strong> hangen af van <strong>F61–F67</strong>, terwijl die F-waarden weer afhangen van <strong>D51–D55</strong> en daarmee van dezelfde laagstructuur. Kolom <strong>G</strong> gebruikt <strong>G37 = C15/F67</strong>, zodat ook de Austroads-tak voor de eerste Romfix-laag met deze lus meebeweegt. De tool doorloopt dezelfde volgorde herhaaldelijk tot de waarden niet meer veranderen (zoals Excel bij ingeschakelde iteratie).</p>
+                <p class="excel-deel-q">Waarom?</p>
+                <p class="excel-deel-a">Zonder iteratie zou u een deel van de formules «los» moeten trekken; het werkboek kiest voor één consistente rekenstaat waarin alle onderdelen tegelijk kloppen.</p>
+                <p class="excel-deel-q">Controle in Excel</p>
+                <p class="excel-deel-a" id="iterInfo"></p>
+            </section>
+        </section>
+    </main>
+
+    <script src="excel-exact.js"></script>
+    <script>
+    (function () {
+        const defaults = {
+            capping: { E19: 4.5, E20: 4.8 },
+            roadbase: { E19: 4.3, E20: 3.8 }
+        };
+
+        function gatherInput() {
+            const sheet = document.getElementById('sheet').value;
+            const inp = {
+                sheet,
+                B12: document.getElementById('B12').value,
+                B13: document.getElementById('B13').value,
+                B14: document.getElementById('B14').value,
+                C13: document.getElementById('C13').value,
+                C14: document.getElementById('C14').value,
+                D13: document.getElementById('D13').value,
+                D14: document.getElementById('D14').value,
+                C15: document.getElementById('C15').value,
+                B19: document.getElementById('B19').value,
+                B20: document.getElementById('B20').value,
+                D19: document.getElementById('D19').value,
+                D20: document.getElementById('D20').value,
+                F13: document.getElementById('F13').value
+            };
+            const e19v = document.getElementById('E19').value.trim();
+            const e20v = document.getElementById('E20').value.trim();
+            if (e19v !== '') inp.E19 = parseFloat(e19v);
+            if (e20v !== '') inp.E20 = parseFloat(e20v);
+            return inp;
+        }
+
+        function syncDefaults() {
+            const sheet = document.getElementById('sheet').value;
+            const d = defaults[sheet] || defaults.capping;
+            const e19 = document.getElementById('E19');
+            const e20 = document.getElementById('E20');
+            if (e19.value.trim() === '') e19.placeholder = String(d.E19);
+            if (e20.value.trim() === '') e20.placeholder = String(d.E20);
+        }
+
+        function run() {
+            const inp = gatherInput();
+            const r = window.computeRomfixWerkboek(inp);
+            const s = r.state;
+
+            const c19 = Number(inp.B12) + Number(inp.B13);
+            const c20 = Number(inp.B12) + Number(inp.B13) + Number(inp.B14);
+            document.getElementById('iterInfo').textContent =
+                'Zet in Excel onder Bestand → Opties → Formules «Inschakelen van iteratieve berekening» aan. Diepte onderzijde eerste wapeningsrij: C19 = ' + c19 + ' mm; tweede rij: C20 = ' + c20 + ' mm. De tool herhaalt de keten tot stabilisatie (zelfde idee als Excel).';
+
+            const c12 = document.getElementById('C12').value;
+            const rows = [
+                ['De bovenste constructielaag (asfalt/beton/fundering) — dikte en E zoals ingevuld; in het resultaatblad op rij 24. <span class="cell-ref">(B24, C24; E24 = C24)</span>', inp.B12, c12, '—', c12],
+                ['Hoogte en E van het <strong>ongewapende</strong> Romfix-deel <em>boven</em> de wapening (eerste pakket). D-kolom: tussenstap voor Palmer (deelt door F61). E-kolom: zelfde getal als Thenn D51. <span class="cell-ref">(B25, C25, D25; E25 = D51)</span>', s.B25, s.C25, s.D25, s.E25],
+                ['Het <strong>gewapende</strong> stuk eerste Romfix (effectieve werkingsdikte × stijfheid uit min(SIF×Eₙᵢᵥ, MIF×In)). D-kolom: Austroads-knoop met F62. <span class="cell-ref">(B26, C26, D26)</span>', s.B26, s.C26, s.D26, ''],
+                ['Ongewapend Romfix <em>onder</em> de wapening, eerste pakket. D-kolom gebruikt F63. <span class="cell-ref">(B27, C27, D27)</span>', s.B27, s.C27, s.D27, ''],
+                ['Zelfde patroon voor het <strong>tweede</strong> Romfix-pakket: ongewapend boven wapening. E-kolom = Thenn D54. <span class="cell-ref">(B28, C28, D28; E28 = D54)</span>', s.B28, s.C28, s.D28, s.E28],
+                ['Gewapend tweede Romfix-pakket. D-kolom met F65. <span class="cell-ref">(B29, C29, D29)</span>', s.B29, s.C29, s.D29, ''],
+                ['Ongewapend onder wapening, tweede pakket. D-kolom met F66. <span class="cell-ref">(B30, C30, D30)</span>', s.B30, s.C30, s.D30, ''],
+                ['Ondergrond — invoer C15 doorvertaald in het resultaat. <span class="cell-ref">(C31, D31, E31)</span>', '—', s.C31, s.C31, s.C31]
+            ];
+            const tb = document.querySelector('#tblLagen tbody');
+            tb.innerHTML = '';
+            rows.forEach(function (row) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="explain">' + row[0] + '</td><td class="num">' + row[1] + '</td><td class="num">' + row[2] + '</td><td class="num">' + row[3] + '</td><td class="num">' + row[4] + '</td>';
+                tb.appendChild(tr);
+            });
+
+            document.getElementById('outC26').textContent = s.C26;
+            document.getElementById('outC29').textContent = s.C29;
+
+            document.getElementById('b46').textContent = s.B46;
+            document.getElementById('c46').textContent = s.C46;
+            document.getElementById('d46').textContent = s.D46;
+            document.getElementById('e46').textContent = s.E46;
+            document.getElementById('f46').textContent = s.F46;
+            document.getElementById('g46').textContent = s.G46;
+
+            const thennBody = document.querySelector('#tblThenn tbody');
+            thennBody.innerHTML = '';
+            [
+                ['Equivalente E van het <strong>hele eerste Romfix-blok</strong> (drie zones stacked in Thenn). <span class="cell-ref">(D51; combineert B51–C53)</span>', s.B25 + s.B26 + s.B27, '—', s.D51],
+                ['Tussentrap: alleen gewapend + ongewapend-laag van het eerste pakket. <span class="cell-ref">(D52; B52–C53)</span>', s.B26 + s.B27, '—', s.D52],
+                ['Alleen de onderste ongewapende zone eerste pakket; D volgt uit C. <span class="cell-ref">(D53; B53, C53)</span>', s.B27, s.C27, s.D53],
+                ['Equivalent <strong>tweede</strong> Romfix-blok (drie zones). <span class="cell-ref">(D54; B54–C56)</span>', s.B28 + s.B29 + s.B30, '—', s.D54],
+                ['Tussentrap tweede pakket: gewapend + ongewapend-laag. <span class="cell-ref">(D55)</span>', s.B29 + s.B30, '—', s.D55],
+                ['Onderste ongewapende zone tweede pakket. <span class="cell-ref">(D56)</span>', s.B30, s.C30, s.D56]
+            ].forEach(function (x) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="explain">' + x[0] + '</td><td class="num">' + x[1] + '</td><td class="num">' + x[2] + '</td><td class="num">' + x[3] + '</td>';
+                thennBody.appendChild(tr);
+            });
+
+            const f2b = document.querySelector('#tblF2 tbody');
+            f2b.innerHTML = '';
+            [
+                ['Correctie eerste Romfix: ongewapend boven wapening (gebruikt in D25). Vaste referentie a = 150 mm in werkboek. <span class="cell-ref">(F61)</span>', s.F61],
+                ['Correctie gewapend deel eerste pakket (D26). <span class="cell-ref">(F62)</span>', s.F62],
+                ['Correctie ongewapend onder eerste wapening (D27). <span class="cell-ref">(F63)</span>', s.F63],
+                ['Correctie tweede pakket, ongewapend boven wapening (D28). <span class="cell-ref">(F64)</span>', s.F64],
+                ['Correctie tweede pakket gewapend (D29). <span class="cell-ref">(F65)</span>', s.F65],
+                ['Correctie tweede pakket ongewapend laag (D30). <span class="cell-ref">(F66)</span>', s.F66],
+                ['Correctie hele tweede Romfix-laag als ongewapende kolom t.o.v. ondergrond; beïnvloedt o.a. G37 = C15/F67. <span class="cell-ref">(F67)</span>', s.F67]
+            ].forEach(function (x) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="explain">' + x[0] + '</td><td class="num">' + (typeof x[1] === 'number' ? x[1].toFixed(6) : x[1]) + '</td>';
+                f2b.appendChild(tr);
+            });
+
+            document.getElementById('excelResult').style.display = 'block';
+            document.getElementById('excelResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.getElementById('sheet').addEventListener('change', syncDefaults);
+        document.getElementById('btnBereken').addEventListener('click', run);
+        syncDefaults();
+
+        /* nav toggle copy */
+        const toggle = document.querySelector('.nav-toggle');
+        const nav = document.getElementById('primaryNav');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function () {
+                const isOpen = nav.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', String(isOpen));
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

@@ -7,6 +7,9 @@ export default {
         if (url.pathname === '/contact' || url.pathname === '/contact/') {
             return env.ASSETS.fetch(new Request(new URL('/contact.html', url.origin), request));
         }
+        if (url.pathname === '/excel-werkboek' || url.pathname === '/excel-werkboek/') {
+            return env.ASSETS.fetch(new Request(new URL('/excel-werkboek.html', url.origin), request));
+        }
         return env.ASSETS.fetch(request);
     },
 };
